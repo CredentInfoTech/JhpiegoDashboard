@@ -3,7 +3,7 @@
   "solution": {
     "name": "dashboard-client-side-solution",
     "id": "0281f669-7682-4b7f-93af-53bdea5023db",
-    "version": "1.0.0.0",
+    "version": "1.0.0.1",
     "includeClientSideAssets": true,
     "skipFeatureDeployment": true,
     "isDomainIsolated": false,
@@ -30,7 +30,7 @@
         "title": "dashboard Feature",
         "description": "The feature that activates elements of the dashboard solution.",
         "id": "65b67d72-3677-4040-a62e-95484810cdc2",
-        "version": "1.0.0.0"
+        "version": "1.0.0.1"
       }
     ]
   },

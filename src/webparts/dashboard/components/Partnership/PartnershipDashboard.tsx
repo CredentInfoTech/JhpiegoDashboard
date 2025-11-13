@@ -640,15 +640,15 @@ export default function PartnershipDashboardTwo(props: any) {
           background: "#fff",
           borderRadius: "13px",
           padding: "12px",
-          marginBottom: "20px",
-          // marginBottom: "15px",
+          // marginBottom: "20px",
+          marginBottom: "12px",
           boxShadow: surfaceShadow,
           border: sectionBorder,
         }}
       >
-        <div style={{ fontSize: "17px", fontWeight: 700, marginBottom: "19px", color: "#23263b" }}>
+        {/* <div style={{ fontSize: "17px", fontWeight: 700, marginBottom: "19px", color: "#23263b" }}>
                     Filters
-                </div>
+                </div> */}
         <div
           style={{
             display: "flex",

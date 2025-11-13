@@ -1,3 +1,4 @@
+/*eslint-disable  @typescript-eslint/explicit-function-return-type */
 import * as React from "react";
 import type { IDashboardProps } from "./IDashboardProps";
 import PartnershipDashboard from "./Partnership/PartnershipDashboard";
@@ -61,7 +62,7 @@ export default class Dashboard extends React.Component<IDashboardProps, { select
       borderRadius: "16px",
       // padding: "32px",
       // marginBottom: "32px",
-      padding: "10px",
+      // padding: "10px",
       marginBottom: "7px",
       // boxShadow: isDarkTheme
       //   ? "0 8px 32px rgba(0, 0, 0, 0.3)"
