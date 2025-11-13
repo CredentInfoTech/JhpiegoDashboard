@@ -1,0 +1,24 @@
+{
+  "@microsoft/generator-sharepoint": {
+    "whichFolder": "subdir",
+    "solutionName": "Dashboard",
+    "componentType": "webpart",
+    "template": "react",
+    "componentName": "Dashboard",
+    "plusBeta": false,
+    "isCreatingSolution": true,
+    "nodeVersion": "18.17.1",
+    "sdksVersions": {
+      "@microsoft/microsoft-graph-client": "3.0.2",
+      "@microsoft/teams-js": "2.24.0"
+    },
+    "version": "1.20.0",
+    "libraryName": "dashboard",
+    "libraryId": "0281f669-7682-4b7f-93af-53bdea5023db",
+    "environment": "spo",
+    "packageManager": "npm",
+    "solutionShortDescription": "Dashboard description",
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false
+  }
+}
