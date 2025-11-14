@@ -2,8 +2,8 @@
 import * as React from "react";
 import type { IDashboardProps } from "./IDashboardProps";
 import PartnershipDashboard from "./Partnership/PartnershipDashboard";
-import PartnershipDashboardTwo from "./Partnership/DashboardSample2";
-
+// import PartnershipDashboardTwo from "./Partnership/DashboardSample2";
+import FundingDashboard from "./Component/FundingDashboards";
 export default class Dashboard extends React.Component<IDashboardProps, { selectedComponent: string }> {
   constructor(props: IDashboardProps) {
     super(props);
@@ -230,7 +230,7 @@ export default class Dashboard extends React.Component<IDashboardProps, { select
             <PartnershipDashboard {...this.props} />
           )}
           {selectedComponent === "FundingDashboard" && (
-            <PartnershipDashboardTwo {...this.props} />
+            <FundingDashboard {...this.props} />
           )}
         </div>
       </div>

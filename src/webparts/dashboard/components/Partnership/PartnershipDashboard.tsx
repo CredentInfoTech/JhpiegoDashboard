@@ -4,8 +4,12 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion*/
 /*eslint-disable no-return-assign */
 /*eslint-disable @typescript-eslint/prefer-as-const */
+/*eslint-disable react/self-closing-comp  */
+/*eslint-disable @rushstack/no-new-null  */
+
 import * as React from "react";
-import { useMemo, useState } from "react";
+import { useState, useEffect, useMemo } from "react";
+import { sp } from "@pnp/sp";
 import {
   Chart as ChartJS,
   ArcElement,
@@ -19,7 +23,8 @@ import {
   Title,
 } from "chart.js";
 import { Pie, Bar, Line } from "react-chartjs-2";
-
+import { DataGrid, } from "@mui/x-data-grid";
+import "./PartnershipDashboard.css";
 ChartJS.register(
   ArcElement,
   ChartTooltip,
@@ -91,197 +96,20 @@ type Partner = {
   parties: number;
   typeOfPartner: string;
   geography: string;
-  validTill: string;
-  createdOn: string;
-  status: "Active" | "Closed";
+  // validTill/createdOn can be null when fetched; mark optional and allow null
+  validTill?: string | null;
+  createdOn?: string | null;
+  // status may contain values beyond the strict union when source data is inconsistent
+  status?: string;
   governingLaw?: string;
   objective?: string;
+  // additional optional fields used in the table
+  contactPersonName?: string;
+  signatory?: string;
+  typeOfInstrument?: string;
 };
 
 const COLORS = ["#5865f2", "#4b91f1", "#a680be", "#4f709c", "#30aabc"];
-
-const mockData: Partner[] = [
-  {
-    id: 1,
-    entityName: "Bhasini (Digital India Bhasini)",
-    parties: 2,
-    typeOfPartner: "Section 8 Company",
-    geography: "National",
-    validTill: "2026-05-01",
-    createdOn: "2021-06-01",
-    status: "Active",
-    governingLaw: "JP",
-    objective: "Use Bhashini platform",
-  },
-  {
-    id: 2,
-    entityName: "Confluence of Health Action",
-    parties: 2,
-    typeOfPartner: "Non-profit",
-    geography: "National",
-    validTill: "2027-01-06",
-    createdOn: "2025-11-11",
-    status: "Closed",
-    governingLaw: "JP",
-    objective: "Support health systems",
-  },
-  {
-    id: 3,
-    entityName: "CSIR (Institute of Genomics)",
-    parties: 2,
-    typeOfPartner: "Research Institute",
-    geography: "National",
-    validTill: "2025-04-01",
-    createdOn: "2025-10-10",
-    status: "Closed",
-    governingLaw: "MoU",
-    objective: "Collaborative Research",
-  },
-  {
-    id: 4,
-    entityName: "Health Department, Govt. Bihar",
-    parties: 2,
-    typeOfPartner: "State Government",
-    geography: "Bihar",
-    validTill: "2027-04-01",
-    createdOn: "2019-03-20",
-    status: "Active",
-    governingLaw: "MoU",
-    objective: "Primary health care",
-  },
-  {
-    id: 5,
-    entityName: "INC (Indian Nursing Council)",
-    parties: 2,
-    typeOfPartner: "Nursing Council",
-    geography: "National",
-    validTill: "2026-07-01",
-    createdOn: "2023-01-15",
-    status: "Active",
-    governingLaw: "JP",
-    objective: "Standards & training",
-  },
-  {
-    id: 6,
-    entityName: "Interhealth",
-    parties: 2,
-    typeOfPartner: "Not for Profit",
-    geography: "MP, Raj, Mah",
-    validTill: "2026-07-01",
-    createdOn: "2020-09-09",
-    status: "Active",
-    governingLaw: "JP",
-    objective: "Implement eSanjeevani",
-  },
-  {
-    id: 7,
-    entityName: "IVA - Indian Veterinary Assoc",
-    parties: 2,
-    typeOfPartner: "Veterinary Association",
-    geography: "National",
-    validTill: "2025-01-12",
-    createdOn: "2018-12-30",
-    status: "Closed",
-    governingLaw: "JP",
-    objective: "Sustainable animal health",
-  },
-  {
-    id: 8,
-    entityName: "National Health Mission (NHM)",
-    parties: 3,
-    typeOfPartner: "Government Program",
-    geography: "National",
-    validTill: "2028-12-31",
-    createdOn: "2022-01-01",
-    status: "Active",
-    governingLaw: "MoU",
-    objective: "Strengthen healthcare delivery",
-  },
-  {
-    id: 9,
-    entityName: "WHO India Office",
-    parties: 2,
-    typeOfPartner: "International Organization",
-    geography: "National",
-    validTill: "2027-06-30",
-    createdOn: "2023-05-15",
-    status: "Active",
-    governingLaw: "MoU",
-    objective: "Support health initiatives",
-  },
-  {
-    id: 10,
-    entityName: "State Health Society, Tamil Nadu",
-    parties: 2,
-    typeOfPartner: "State Government",
-    geography: "Tamil Nadu",
-    validTill: "2026-03-31",
-    createdOn: "2021-11-20",
-    status: "Active",
-    governingLaw: "MoU",
-    objective: "Improve maternal health",
-  },
-  {
-    id: 11,
-    entityName: "UNICEF India",
-    parties: 2,
-    typeOfPartner: "International Organization",
-    geography: "National",
-    validTill: "2025-09-30",
-    createdOn: "2020-07-10",
-    status: "Closed",
-    governingLaw: "MoU",
-    objective: "Child health and nutrition",
-  },
-  {
-    id: 12,
-    entityName: "Public Health Foundation of India (PHFI)",
-    parties: 2,
-    typeOfPartner: "Non-profit",
-    geography: "National",
-    validTill: "2029-01-01",
-    createdOn: "2024-02-14",
-    status: "Active",
-    governingLaw: "JP",
-    objective: "Public health research",
-  },
-  {
-    id: 13,
-    entityName: "AIIMS Delhi",
-    parties: 2,
-    typeOfPartner: "Research Institute",
-    geography: "Delhi",
-    validTill: "2024-08-15",
-    createdOn: "2022-08-15",
-    status: "Active",
-    governingLaw: "MoU",
-    objective: "Medical research collaboration",
-  },
-  {
-    id: 14,
-    entityName: "National Institute of Epidemiology",
-    parties: 2,
-    typeOfPartner: "Research Institute",
-    geography: "Tamil Nadu",
-    validTill: "2025-12-31",
-    createdOn: "2020-01-01",
-    status: "Closed",
-    governingLaw: "MoU",
-    objective: "Epidemiological studies",
-  },
-  {
-    id: 15,
-    entityName: "Jharkhand Rural Health Mission",
-    parties: 2,
-    typeOfPartner: "State Government",
-    geography: "Jharkhand",
-    validTill: "2027-10-01",
-    createdOn: "2023-03-01",
-    status: "Active",
-    governingLaw: "MoU",
-    objective: "Rural healthcare improvement",
-  },
-];
 
 export default function PartnershipDashboardTwo(props: any) {
   const [from, setFrom] = useState<string>("");
@@ -293,70 +121,95 @@ export default function PartnershipDashboardTwo(props: any) {
     closed: boolean;
   }>({ valid: false, closed: false });
   const [filterClosed, setFilterClosed] = useState<boolean>(false);
+  const [partners, setPartners] = useState<Partner[]>([]); // State to store fetched data
+  const operationalPartnership = "PartnershipDetails";
+  // const [showAll, setShowAll] = useState<boolean>(false);
 
-  // derived list of geographies
+  // Fetch data from the operationalPartnership list
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const items = await sp.web.lists
+          .getByTitle(operationalPartnership)
+          .items.get();
+        console.log("Fetched items:", items);
+
+        const formattedItems = items.map((item: any) => ({
+          id: item.ID,
+          entityName: item.EntityName || "N/A",
+          parties: item.NoOfParties || 0,
+          typeOfPartner: item.TypeOfPartner || "N/A",
+          geography: item.Geography || "N/A",
+          validTill: item.ValidTill || null,
+          createdOn: item.Created || null,
+          status: item.JhpiegoStatus || "N/A",
+          governingLaw: item.GoverningLaw || "N/A",
+          signatory: item.Signatory || "N/A",
+          contactPersonName: item.ContactPersonName || "N/A",
+          typeOfInstrument: item.TypeOfInstrument || "N/A",
+          objective: item.Objective || "N/A",
+        }));
+        setPartners(formattedItems); // Update state with fetched data
+      } catch (error) {
+        console.error(
+          "Error fetching data from operationalPartnership list:",
+          error
+        );
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // Derived list of geographies
   const geographyOptions = useMemo(() => {
-    const s = new Set(mockData.map((d) => d.geography));
+    const s = new Set(partners.map((d) => d.geography));
     const arr: string[] = [];
     s.forEach((v) => arr.push(v));
     return ["All", ...arr];
-  }, []);
+  }, [partners]);
 
-  // filter logic
+  // Filter logic
   const filtered = useMemo(() => {
-    return mockData.filter((p) => {
+    return partners.filter((p) => {
       if (geography !== "All" && p.geography !== geography) return false;
-      if (from && new Date(p.createdOn) < new Date(from)) return false;
-      if (to && new Date(p.createdOn) > new Date(to)) return false;
+      if (from || to) {
+        const validDate = p.validTill ? new Date(p.validTill) : null;
+        if (!validDate) return false;
+        if (from && validDate < new Date(from)) return false;
+        if (to && validDate > new Date(to)) return false;
+      }
 
       const today = new Date();
-      const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+      const todayStart = new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate()
+      );
 
       const statusChecks = [];
       if (filterActive) statusChecks.push(p.status === "Active");
-      if (filterClosed) statusChecks.push(p.status === "Closed");
-      if (contracts.valid) statusChecks.push(p.validTill && new Date(p.validTill) >= todayStart);
-      if (contracts.closed) statusChecks.push(p.validTill && new Date(p.validTill) < todayStart);
+      if (filterClosed) statusChecks.push(p.status === "Inactive");
+      if (contracts.valid)
+        statusChecks.push(p.validTill && new Date(p.validTill) >= todayStart);
+      if (contracts.closed)
+        statusChecks.push(p.validTill && new Date(p.validTill) < todayStart);
 
       if (statusChecks.length > 0 && !statusChecks.some(Boolean)) return false;
       return true;
     });
-  }, [from, to, geography, filterActive, filterClosed, contracts]);
-
-  // summary metrics
- /* const totals = useMemo(() => {
-    const totalPartners = filtered.length;
-    const active = filtered.filter((p) => p.status === "Active").length;
-    // derive valid/closed from validTill date (non-expired = valid, expired = closed)
-    const today = new Date();
-    const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-    const valid = filtered.filter(p => {
-      const d = p.validTill ? new Date(p.validTill) : null;
-      return d ? d >= todayStart : false;
-    }).length;
-    const closed = filtered.filter(p => {
-      const d = p.validTill ? new Date(p.validTill) : null;
-      return d ? d < todayStart : false;
-    }).length;
-    // expiring soon: validTill within next 30 days (inclusive)
-    const in30 = new Date(todayStart.getTime() + 30 * 24 * 60 * 60 * 1000);
-    const expiring = filtered.filter(p => {
-      const d = p.validTill ? new Date(p.validTill) : null;
-      return d ? (d >= todayStart && d <= in30) : false;
-    }).length;
-    return { totalPartners, active, valid, closed, expiring };
-  }, [filtered]);
-  */
+  }, [from, to, geography, filterActive, filterClosed, contracts, partners]);
 
   // Modify the status chart to show Active and Status Closed Request
   const statusChart = useMemo(() => {
     const map = new Map<string, number>();
     filtered.forEach((p) => {
       if (p.status === "Active") {
+        // map.set("Active", (map.get("Active") || 0) + 1);
         map.set("Active", (map.get("Active") || 0) + 1);
-      } else if (p.status === "Closed") {
+      } else if (p.status === "Inactive") {
         // map.set("Status Closed Request", (map.get("Status Closed Request") || 0) + 1);
-        map.set("Closed", (map.get("Closed") || 0) + 1);
+        map.set("Inactive", (map.get("Inactive") || 0) + 1);
       }
     });
     const arr: { name: string; value: number }[] = [];
@@ -367,7 +220,11 @@ export default function PartnershipDashboardTwo(props: any) {
   // Modify the contractsChart logic to show all contracts by default
   const contractsChart = useMemo(() => {
     const today = new Date();
-    const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const todayStart = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate()
+    );
     const map = new Map<string, number>();
     filtered.forEach((p) => {
       const validTillDate = p.validTill ? new Date(p.validTill) : null;
@@ -375,11 +232,11 @@ export default function PartnershipDashboardTwo(props: any) {
         if (validTillDate >= todayStart) {
           map.set("Valid", (map.get("Valid") || 0) + 1);
         } else {
-          map.set("Expire", (map.get("Expire") || 0) + 1);
+          map.set("Closed", (map.get("Closed") || 0) + 1);
         }
       }
     });
-    const arr: { name: string, value: number }[] = [];
+    const arr: { name: string; value: number }[] = [];
     map.forEach((value, name) => arr.push({ name, value }));
     return arr;
   }, [filtered]);
@@ -387,12 +244,13 @@ export default function PartnershipDashboardTwo(props: any) {
   // Update the Contracts by Status chart to use green for Active and red for Closed
   const statusData = useMemo(
     () => ({
-      labels: statusChart.map((s) => s.name),
+      // labels: statusChart.map((s) => `${s.name} (${s.value})`),
+      labels: statusChart.map((s) => `${s.name}`),
       datasets: [
         {
           data: statusChart.map((s) => s.value),
-          backgroundColor: statusChart.map((s) =>
-            s.name === "Active" ? "#55ac83" : "#f4577b" // Green for Active, Red for Closed
+          backgroundColor: statusChart.map(
+            (s) => (s.name === "Active" ? "#55ac83" : "#f4577b") // Green for Active, Red for Closed
           ),
           hoverOffset: 8,
         },
@@ -404,12 +262,13 @@ export default function PartnershipDashboardTwo(props: any) {
   // Update the Contracts (Valid / Expired) chart to use yellow for Valid and red for Expired
   const contractsData = useMemo(
     () => ({
-      labels: contractsChart.map((c) => c.name),
+      // labels: contractsChart.map((c) => `${c.name} (${c.value})`),
+      labels: contractsChart.map((c) => `${c.name}`),
       datasets: [
         {
           data: contractsChart.map((c) => c.value),
-          backgroundColor: contractsChart.map((c) =>
-            c.name === "Valid" ? "#f7c948" : "#f4577b" // Yellow for Valid, Red for Expired
+          backgroundColor: contractsChart.map(
+            (c) => (c.name === "Valid" ? "#f7c948" : "#f4577b") // Yellow for Valid, Red for Expired
           ),
           hoverOffset: 8,
         },
@@ -445,31 +304,31 @@ export default function PartnershipDashboardTwo(props: any) {
   }, [filtered]);
 
   // derive time series chart (group by YYYY-MM) from createdOn
-  const timeChart = useMemo(() => {
-    const map = new Map<string, number>();
-    const today = new Date();
-    const oneYearAgo = new Date(today.getFullYear() - 1, today.getMonth(), today.getDate());
+  // const timeChart = useMemo(() => {
+  //   const map = new Map<string, number>();
+  //   const today = new Date();
+  //   const oneYearAgo = new Date(today.getFullYear() - 1, today.getMonth(), today.getDate());
 
-    filtered.forEach((p) => {
-      if (!p.createdOn) return;
-      const createdDate = new Date(p.createdOn);
-      if (createdDate < oneYearAgo) return; // Exclude data older than 12 months
+  //   filtered.forEach((p) => {
+  //     if (!p.createdOn) return;
+  //     const createdDate = new Date(p.createdOn);
+  //     if (createdDate < oneYearAgo) return; // Exclude data older than 12 months
 
-      const month = (createdDate.getMonth() + 1).toString();
-      const key = `${createdDate.getFullYear()}-${("0" + month).slice(-2)}`;
-      map.set(key, (map.get(key) || 0) + 1);
-    });
+  //     const month = (createdDate.getMonth() + 1).toString();
+  //     const key = `${createdDate.getFullYear()}-${("0" + month).slice(-2)}`;
+  //     map.set(key, (map.get(key) || 0) + 1);
+  //   });
 
-    // Sort keys ascending
-    const keysArr: string[] = [];
-    map.forEach((_, k) => keysArr.push(k));
-    const keys = keysArr.sort();
-    const arr: { name: string; value: number }[] = keys.map((k) => ({
-      name: k,
-      value: map.get(k) || 0,
-    }));
-    return arr;
-  }, [filtered]);
+  //   // Sort keys ascending
+  //   const keysArr: string[] = [];
+  //   map.forEach((_, k) => keysArr.push(k));
+  //   const keys = keysArr.sort();
+  //   const arr: { name: string; value: number }[] = keys.map((k) => ({
+  //     name: k,
+  //     value: map.get(k) || 0,
+  //   }));
+  //   return arr;
+  // }, [filtered]);
 
   const geoData = useMemo(
     () => ({
@@ -485,13 +344,33 @@ export default function PartnershipDashboardTwo(props: any) {
     [geoChart]
   );
 
+  const upcomingValidTill = useMemo(() => {
+    const now = new Date();
+    // Collect future validTill dates from filtered partners, group by date and count
+    const map = new Map<string, number>();
+    filtered.forEach((p) => {
+      if (!p.validTill) return;
+      const d = new Date(p.validTill);
+      if (isNaN(d.getTime())) return;
+      if (d <= now) return; // only future dates
+      // use ISO date (YYYY-MM-DD) as key to group by day
+      const key = d.toISOString().slice(0, 10);
+      map.set(key, (map.get(key) || 0) + 1);
+    });
+
+    const arr: { name: string; value: number }[] = [];
+    map.forEach((value, key) => arr.push({ name: key, value }));
+    arr.sort((a, b) => new Date(a.name).getTime() - new Date(b.name).getTime());
+    return arr.slice(0, 12); // Take the next 12 entries
+  }, [filtered]);
+
   const timeData = useMemo(
     () => ({
-      labels: timeChart.map((t) => t.name),
+      labels: upcomingValidTill.map((t) => t.name),
       datasets: [
         {
           label: "Contracts",
-          data: timeChart.map((t) => t.value),
+          data: upcomingValidTill.map((t) => t.value),
           borderColor: "#5865f2",
           backgroundColor: "rgba(88, 101, 242, 0.15)",
           fill: true,
@@ -499,7 +378,7 @@ export default function PartnershipDashboardTwo(props: any) {
         },
       ],
     }),
-    [timeChart]
+    [upcomingValidTill]
   );
 
   // Add a new chart for Partners by Type
@@ -554,41 +433,313 @@ export default function PartnershipDashboardTwo(props: any) {
     transition: "transform 0.2s, box-shadow 0.2s",
   };
 
-  // Add styles for the table container and scrollbar
-  const tableContainerStyle = {
-    maxHeight: "400px", // Set the desired height
-    overflowY: "auto" as "auto", // Explicitly cast to valid type
-    scrollbarColor: "#5865f2 #e3e7fa", // For Firefox
+  // Adjust layout for 'Partners by Type'
+  // const PartnersByType = () => (
+  //   <div style={{ display: "flex", alignItems: "center", padding: "24px" }}>
+  //     {/* Chart on the left */}
+  //     <div style={{ flex: 1 }}>
+  //       <Pie
+  //         data={typeData}
+  //         options={{
+  //           ...commonOptions,
+  //           plugins: {
+  //             ...commonOptions.plugins,
+  //             tooltip: {
+  //               callbacks: {
+  //                 label: function (tooltipItem) {
+  //                   const dataset = tooltipItem.dataset;
+  //                   const total = dataset.data.reduce(
+  //                     (acc, value) => acc + value,
+  //                     0
+  //                   );
+  //                   const value = dataset.data[tooltipItem.dataIndex];
+  //                   const percentage = ((value / total) * 100).toFixed(2);
+  //                   return `${tooltipItem.label}: ${percentage}% (${value})`;
+  //                 },
+  //               },
+  //             },
+  //           },
+  //         }}
+  //       />
+  //     </div>
+
+  //     {/* Names with counts on the right */}
+  //     <div style={{ flex: 1, paddingLeft: "20px" }}>
+  //       {typeChart.map((t) => (
+  //         <div
+  //           key={t.name}
+  //           style={{
+  //             display: "flex",
+  //             justifyContent: "space-between",
+  //             marginBottom: "8px",
+  //             fontSize: "14px",
+  //             fontWeight: "600",
+  //             color: "#4f709c",
+  //           }}
+  //         >
+  //           <span>{t.name}</span>
+  //           <span>{t.value}</span>
+  //         </div>
+  //       ))}
+  //     </div>
+  //   </div>
+  // );
+
+  //   const PartnersByType = () => (
+  //   <div
+  //     style={{
+  //       display: "flex",
+  //       alignItems: "flex-start",
+  //       justifyContent: "space-between",
+  //       padding: "24px",
+  //       gap: "20px",
+  //     }}
+  //   >
+  //     {/* Chart on the left */}
+  //     <div style={{ flex: "0 0 40%", display: "flex", justifyContent: "center" }}>
+  //       <Pie
+  //   data={typeData}
+  //   options={{
+  //     ...commonOptions,
+  //     plugins: {
+  //       ...commonOptions.plugins,
+  //       // legend: {
+  //       //   display: false,  // 🔥 Hides the labels below the pie chart
+  //       // },
+  //       legend: {
+  //   display: true,
+  //   position: "right",
+  //   labels: {
+  //     usePointStyle: true,
+  //     padding: 20,
+  //   },
+  // },
+
+  //       tooltip: {
+  //         callbacks: {
+  //           label: function (tooltipItem) {
+  //             const dataset = tooltipItem.dataset;
+  //             const total = dataset.data.reduce((acc, value) => acc + value, 0);
+  //             const value = dataset.data[tooltipItem.dataIndex];
+  //             const percentage = ((value / total) * 100).toFixed(2);
+  //             return `${tooltipItem.label}: ${percentage}% (${value})`;
+  //           },
+  //         },
+  //       },
+  //     },
+  //   }}
+  // />
+
+  //     </div>
+
+  //     {/* Labels on the right */}
+  //     <div
+  //       style={{
+  //         flex: "0 0 60%",
+  //         paddingLeft: "20px",
+  //         maxHeight: "300px", // Set a specific height
+  //         overflowY: "auto", // Enable scrolling
+  //         border: "1px solid #e3e7fa", // Optional: Add a border for clarity
+  //         borderRadius: "8px",
+  //         padding: "10px",
+  //       }}
+  //     >
+  //       {typeChart.map((t, index) => (
+  //         <div
+  //           key={index}
+  //           style={{
+  //             display: "flex",
+  //             alignItems: "center",
+  //             marginBottom: "8px",
+  //             fontSize: "14px",
+  //             fontWeight: "600",
+  //             color: "#4f709c",
+  //           }}
+  //         >
+  //           <div
+  //             style={{
+  //               width: "12px",
+  //               height: "12px",
+  //               backgroundColor: COLORS[index % COLORS.length],
+  //               marginRight: "8px",
+  //             }}
+  //           />
+  //           <span style={{ flex: 1 }}>{t.name}</span>
+  //           <span>{t.value}</span>
+  //         </div>
+  //       ))}
+  //     </div>
+  //   </div>
+  // );
+
+  // const PartnersByType = () => (
+  //   <div
+  //     style={{
+  //       display: "flex",
+  //       justifyContent: "center",
+  //       padding: "24px",
+  //       width: "100%",
+  //     }}
+  //   >
+  //     <div
+  //       style={{
+  //         display: "flex",
+  //         width: "100%",
+  //         maxWidth: "900px", // ensure enough space
+  //         justifyContent: "center",
+  //       }}
+  //     >
+  //       <Pie
+  //         data={typeData}
+  //         options={{
+  //           ...commonOptions,
+  //           maintainAspectRatio: false,
+  //           plugins: {
+  //             ...commonOptions.plugins,
+  //             legend: {
+  //               display: true,
+  //               position: "right",
+  //               fullSize: true,
+  //               labels: {
+  //                 usePointStyle: true,
+  //                 padding: 18,
+  //                 boxWidth: 12,
+  //                 font: {
+  //                   size: 13,
+  //                 },
+  //               },
+  //             },
+  //             tooltip: {
+  //               callbacks: {
+  //                 label: function (tooltipItem) {
+  //                   const dataset = tooltipItem.dataset;
+  //                   const total = dataset.data.reduce((acc, v) => acc + v, 0);
+  //                   const value = dataset.data[tooltipItem.dataIndex];
+  //                   const percentage = ((value / total) * 100).toFixed(2);
+  //                   return `${tooltipItem.label}: ${percentage}% (${value})`;
+  //                 },
+  //               },
+  //             },
+  //           },
+  //         }}
+  //         height={350} // required for proper legend wrapping
+  //       />
+  //     </div>
+  //   </div>
+  // );
+
+  const PartnersByType = () => {
+    const legendRef = React.useRef<HTMLDivElement>(null);
+
+    return (
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          gap: "24px",
+          padding: "20px",
+          width: "100%",
+        }}
+      >
+        {/* Pie Chart */}
+        <div style={{ width: "45%" }}>
+          <Pie
+            data={typeData}
+            options={{
+              ...commonOptions,
+              plugins: {
+                legend: { display: false }, // ❗ hide default legend
+                tooltip: {
+                  callbacks: {
+                    label: function (tooltipItem) {
+                      const dataset = tooltipItem.dataset;
+                      const total = dataset.data.reduce((acc, v) => acc + v, 0);
+                      const value = dataset.data[tooltipItem.dataIndex];
+                      const percentage = ((value / total) * 100).toFixed(2);
+                      return `${tooltipItem.label}: ${percentage}% (${value})`;
+                    },
+                  },
+                },
+              },
+            }}
+            height={350}
+          />
+        </div>
+
+        {/* Scrollable Legend with Headings */}
+        <div
+          ref={legendRef}
+          className="chart-scrollbar"
+          style={{
+            width: "55%",
+            maxHeight: "300px",
+            overflowY: "auto",
+            padding: "12px",
+            border: "1px solid #e3e7fa",
+            borderRadius: "8px",
+            background: "#fafbff",
+          }}
+        >
+          {/* Headings */}
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              padding: "6px 0",
+              fontSize: "14px",
+              fontWeight: "700",
+              color: "#3a4b6b",
+              borderBottom: "1px solid #e3e7fa",
+              marginBottom: "8px",
+            }}
+          >
+            <span>Name</span>
+            <span>Count</span>
+          </div>
+
+          {/* Scrollable Content */}
+          {typeData.labels.map((label: string, index: number) => {
+            // Ensure the backgroundColor array has enough colors
+            const backgroundColor =
+              typeData.datasets[0].backgroundColor[
+                index % typeData.datasets[0].backgroundColor.length
+              ];
+
+            return (
+              <div
+                key={index}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  padding: "6px 0",
+                  fontSize: "14px",
+                  color: "#3a4b6b",
+                  fontWeight: 500,
+                  borderBottom: "1px solid #eee",
+                }}
+              >
+                <div
+                  style={{
+                    width: "12px",
+                    height: "12px",
+                    borderRadius: "50%",
+                    backgroundColor: backgroundColor,
+                    marginRight: "10px",
+                  }}
+                ></div>
+
+                <span style={{ flex: 1 }}>{label}</span>
+
+                <span style={{ fontWeight: "600" }}>
+                  {typeData.datasets[0].data[index]}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
   };
-
-  const exportButtonStyle = {
-    ...buttonStyle,
-    marginBottom: "15px",
-  };
-
-  // Fix type issues for exportToCSV function
-  function exportToCSV(data: Partner[]) {
-    const csvContent = [
-      ["Entity", "Parties", "Type", "Geography", "Valid Till", "Status", "Objective"],
-      ...data.map((p: Partner) => [
-        p.entityName,
-        p.parties,
-        p.typeOfPartner,
-        p.geography,
-        p.validTill || "N/A",
-        p.status,
-        p.objective,
-      ]),
-    ]
-      .map((row) => row.join(","))
-      .join("\n");
-
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "PartnershipDetails.csv";
-    link.click();
-  }
 
   return (
     <div
@@ -646,7 +797,7 @@ export default function PartnershipDashboardTwo(props: any) {
           border: sectionBorder,
         }}
       >
-        {/* <div style={{ fontSize: "17px", fontWeight: 700, marginBottom: "19px", color: "#23263b" }}>
+        {/* <div style={{ fontSize: "17px", fontWeight: "700", marginBottom: "19px", color: "#23263b" }}>
                     Filters
                 </div> */}
         <div
@@ -757,7 +908,7 @@ export default function PartnershipDashboardTwo(props: any) {
                   }}
                 />
                 <span style={{ fontSize: "15px", color: "#23263b" }}>
-                  InActive
+                  Inactive
                 </span>
               </label>
             </div>
@@ -767,7 +918,7 @@ export default function PartnershipDashboardTwo(props: any) {
             <span
               style={{ fontSize: "14px", fontWeight: "600", color: "#5f6ab8" }}
             >
-              Contracts (Valid / Expired)
+              Contracts (Valid / Closed)
             </span>
             <div style={{ display: "flex", gap: "14px" }}>
               <label
@@ -842,7 +993,8 @@ export default function PartnershipDashboardTwo(props: any) {
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.transform = "translateY(-2px)";
-              e.currentTarget.style.boxShadow = "0 6px 22px rgba(88, 101, 242, 0.26)";
+              e.currentTarget.style.boxShadow =
+                "0 6px 22px rgba(88, 101, 242, 0.26)";
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.transform = "translateY(0)";
@@ -978,7 +1130,7 @@ export default function PartnershipDashboardTwo(props: any) {
             <Pie data={statusData} options={commonOptions as any} />
           </div>
         </div>
-         <div
+        <div
           style={{
             background: "#f8fafc",
             borderRadius: "13px",
@@ -1038,7 +1190,7 @@ export default function PartnershipDashboardTwo(props: any) {
             <Bar data={geoData} options={barOptions as any} />
           </div>
         </div>
-        
+
         {/* <div
           style={{
             background: "#f8fafc",
@@ -1100,7 +1252,7 @@ export default function PartnershipDashboardTwo(props: any) {
           </div>
         </div> */}
       </div>
-       <div
+      <div
         style={{
           display: "grid",
           // gridTemplateColumns: "repeat(auto-fit, minmax(350px, 1fr))",
@@ -1110,7 +1262,6 @@ export default function PartnershipDashboardTwo(props: any) {
           marginBottom: "32px",
         }}
       >
-
         <div
           style={{
             background: "#f8fafc",
@@ -1135,13 +1286,14 @@ export default function PartnershipDashboardTwo(props: any) {
               color: "#7b6ced",
             }}
           >
-            Contracts Created Over Time
+            Upcoming Valid Till
           </div>
           <div style={{ height: 210 }}>
             <Line data={timeData} options={lineOptions as any} />
           </div>
         </div>
-        <div
+
+        {/* <div
           style={{
             background: "#f8fafc",
             borderRadius: "13px",
@@ -1170,8 +1322,36 @@ export default function PartnershipDashboardTwo(props: any) {
           <div style={{ height: 210 }}>
             <Pie data={typeData} options={commonOptions as any} />
           </div>
-        </div>
+        </div> */}
 
+        <div
+          style={{
+            background: "#f8fafc",
+            borderRadius: "13px",
+            padding: "24px",
+            border: sectionBorder,
+            boxShadow: surfaceShadow,
+            transition: "box-shadow 0.2s",
+          }}
+          onMouseEnter={(e) =>
+            (e.currentTarget.style.boxShadow = "0 5px 26px #5865f21a")
+          }
+          onMouseLeave={(e) =>
+            (e.currentTarget.style.boxShadow = surfaceShadow)
+          }
+        >
+          <div
+            style={{
+              fontSize: "17px",
+              fontWeight: 700,
+              marginBottom: "17px",
+              color: "#4f709c",
+            }}
+          >
+            Partners by Type
+          </div>
+          <PartnersByType />
+        </div>
       </div>
 
       {/* Table Section */}
@@ -1202,212 +1382,75 @@ export default function PartnershipDashboardTwo(props: any) {
           >
             Partnership Details
           </div>
-          <button
-            style={exportButtonStyle}
-            onClick={() => exportToCSV(filtered)}
-          >
-            Export to CSV
-          </button>
         </div>
-        <div style={{ ...tableContainerStyle, overflowX: "auto" }}>
-          <table
-            style={{
-              width: "100%",
-              borderCollapse: "collapse",
-              fontSize: "15px",
+        <div style={{ height: 600, width: "100%" }}>
+          <DataGrid
+            rows={filtered.map((p, idx) => ({ ...p, id: p.id || idx }))}
+            columns={[
+              { field: "entityName", headerName: "Entity", width: 150 },
+              { field: "parties", headerName: "Parties", width: 100 },
+              { field: "typeOfPartner", headerName: "Type", width: 150 },
+              { field: "geography", headerName: "Geography", width: 150 },
+              { field: "validTill", headerName: "Valid Till", width: 120 },
+              { field: "status", headerName: "Status", width: 120 },
+              { field: "objective", headerName: "Objective", width: 200 },
+              {
+                field: "contactPersonName",
+                headerName: "Contact Person",
+                width: 150,
+              },
+              { field: "createdOn", headerName: "Created", width: 120 },
+              {
+                field: "governingLaw",
+                headerName: "Governing Law",
+                width: 150,
+              },
+              { field: "signatory", headerName: "Signatory", width: 150 },
+              {
+                field: "typeOfInstrument",
+                headerName: "Instrument Type",
+                width: 150,
+              },
+            ]}
+            showToolbar
+            initialState={{
+              pagination: { paginationModel: { page: 0, pageSize: 10 } },
             }}
-          >
-            <thead>
-              <tr
-                style={{
-                  background:
-                    "linear-gradient(110deg, #4b91f1 0%, #8e9ae6 100%)",
-                  color: "#fff",
-                }}
-              >
-                <th
-                  style={{
-                    padding: "16px 13px",
-                    fontWeight: 800,
-                    fontSize: "13px",
-                  }}
-                >
-                  Entity
-                </th>
-                <th
-                  style={{
-                    padding: "16px 13px",
-                    fontWeight: 800,
-                    fontSize: "13px",
-                  }}
-                >
-                  Parties
-                </th>
-                <th
-                  style={{
-                    padding: "16px 13px",
-                    fontWeight: 800,
-                    fontSize: "13px",
-                  }}
-                >
-                  Type
-                </th>
-                <th
-                  style={{
-                    padding: "16px 13px",
-                    fontWeight: 800,
-                    fontSize: "13px",
-                  }}
-                >
-                  Geography
-                </th>
-                <th
-                  style={{
-                    padding: "16px 13px",
-                    fontWeight: 800,
-                    fontSize: "13px",
-                  }}
-                >
-                  Valid Till
-                </th>
-                <th
-                  style={{
-                    padding: "16px 13px",
-                    fontWeight: 800,
-                    fontSize: "13px",
-                  }}
-                >
-                  Status
-                </th>
-                <th
-                  style={{
-                    padding: "16px 13px",
-                    fontWeight: 800,
-                    fontSize: "13px",
-                  }}
-                >
-                  Objective
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((p, idx) => {
-                // derive validity from validTill
-                const validTillDate = p.validTill ? new Date(p.validTill) : null;
-                const today = new Date();
-                const todayStart = new Date(
-                  today.getFullYear(),
-                  today.getMonth(),
-                  today.getDate()
-                );
-                const contractIsValid = validTillDate
-                  ? validTillDate >= todayStart
-                  : false;
-                const contractIsClosed = validTillDate
-                  ? validTillDate < todayStart
-                  : false;
+            pageSizeOptions={[10, 20, 50]}
+            sx={{
+              "& .MuiDataGrid-columnHeader, & .MuiDataGrid-columnHeader--sortable, & .MuiDataGrid-withBorderColor":
+                {
+                  background: "#4b91f1 !important",
+                },
 
-                // determine display label per request
-                // - Inactive  -> "Closed Status Request"
-                // - Active    -> "Active Status Request"
-                // - otherwise use validTill to decide between "Valid" and "Closed"
-                let statusLabel: string;
-                if (p.status === "Closed") {
-                  statusLabel = "Closed";
-                } else if (p.status === "Active") {
-                  statusLabel = "Active";
-                } else {
-                  // for other statuses rely on validTill date
-                  statusLabel = contractIsValid ? "Valid" : "Closed";
-                }
+              "& .MuiDataGrid-columnHeaders": {
+                backgroundColor: "#4b91f1",
+                color: "#fff",
+                fontSize: "14px",
+                fontWeight: "bold",
+              },
 
-                // colors: Active uses active color, Inactive and closed use closed color, else a neutral color
-                const activeBg = "#d9f9ec";
-                const closedBg = "#fae2e9";
-                const neutralBg = "#fff5e0";
-                const activeColor = "#55ac83";
-                const closedColor = "#f4577b";
-                const neutralColor = "#f79e16";
+              "& .MuiDataGrid-virtualScroller": {
+                overflowY: "auto",
+              },
 
-                const background = p.status === "Active" ? activeBg : (p.status === "Closed" || contractIsClosed) ? closedBg : neutralBg;
-                const color = p.status === "Active" ? activeColor : (p.status === "Closed" || contractIsClosed) ? closedColor : neutralColor;
-
-                return (
-                  <tr
-                    key={p.id}
-                    style={{
-                      borderBottom: "1px solid #e3e7fa",
-                      background: idx % 2 === 0 ? "#f8fafc" : "#fff",
-                      transition: "background 0.3s",
-                    }}
-                    onMouseEnter={(e) =>
-                      (e.currentTarget.style.background = "#e3eafc")
-                    }
-                    onMouseLeave={(e) =>
-                      (e.currentTarget.style.background =
-                        idx % 2 === 0 ? "#f8fafc" : "#fff")
-                    }
-                  >
-                    <td
-                      style={{
-                        padding: "13px",
-                        fontWeight: "600",
-                        color: "#23263b",
-                      }}
-                    >
-                      {p.entityName}
-                    </td>
-                    <td style={{ padding: "13px", color: "#4f709c" }}>
-                      {p.parties}
-                    </td>
-                    <td style={{ padding: "13px", color: "#4f709c" }}>
-                      {p.typeOfPartner}
-                    </td>
-                    <td style={{ padding: "13px", color: "#4f709c" }}>
-                      {p.geography}
-                    </td>
-                    <td style={{ padding: "13px", color: "#4f709c" }}>
-                      {p.validTill ? new Date(p.validTill).toLocaleDateString() : "N/A"}
-                    </td>
-                    <td style={{ padding: "13px" }}>
-                      <span
-                        style={{
-                          display: "inline-block",
-                          padding: "5px 14px",
-                          borderRadius: "14px",
-                          fontSize: "13px",
-                          fontWeight: 700,
-                          background,
-                          color,
-                        }}
-                      >
-                        {statusLabel}
-                      </span>
-                    </td>
-                    <td style={{ padding: "13px", color: "#7b7b94" }}>
-                      {p.objective}
-                    </td>
-                  </tr>
-                );
-              })}
-              {filtered.length === 0 && (
-                <tr>
-                  <td
-                    colSpan={7}
-                    style={{
-                      padding: "36px",
-                      textAlign: "center",
-                      color: "#b6c0e1",
-                      fontSize: "15px",
-                      fontWeight: 600,
-                    }}
-                  >
-                    No records match the current filters.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+              /* 🔥 Custom Scrollbar */
+              "& .MuiDataGrid-virtualScroller::-webkit-scrollbar": {
+                width: "8px ",
+              },
+              "& .MuiDataGrid-virtualScroller::-webkit-scrollbar-track": {
+                background: "#e4e7ec",
+                borderRadius: "8px",
+              },
+              "& .MuiDataGrid-virtualScroller::-webkit-scrollbar-thumb": {
+                background: "#4b91f1",
+                borderRadius: "8px",
+              },
+              "& .MuiDataGrid-virtualScroller::-webkit-scrollbar-thumb:hover": {
+                background: "#3872c9",
+              },
+            }}
+          />
         </div>
       </div>
     </div>
