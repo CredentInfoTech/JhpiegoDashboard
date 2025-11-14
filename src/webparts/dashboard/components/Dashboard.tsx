@@ -8,7 +8,7 @@ export default class Dashboard extends React.Component<IDashboardProps, { select
   constructor(props: IDashboardProps) {
     super(props);
     this.state = {
-      selectedComponent: "PartnershipDashboard",
+      selectedComponent: "FundingDashboard",
     };
   }
 

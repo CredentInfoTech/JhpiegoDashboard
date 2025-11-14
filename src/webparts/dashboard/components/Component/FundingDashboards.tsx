@@ -22,6 +22,7 @@ import {
   Title,
 } from "chart.js";
 import ChartDataLabels from "chartjs-plugin-datalabels";
+import { Plugin } from "chart.js/dist/types/index";
 
 // ---------------------- Interfaces -----------------------
 interface KeywordData {
@@ -528,7 +529,7 @@ const FundingDashboard: React.FC<IDashboardProps> = (props) => {
                     "Top 10 Organisation Count"
                   )}
                   options={options}
-                  plugins={[ChartDataLabels]}
+                  plugins={[ChartDataLabels as Plugin<"bar", object>]}
                 />
               );
             })()}
@@ -544,7 +545,7 @@ const FundingDashboard: React.FC<IDashboardProps> = (props) => {
                 "Website Count"
               )}
               options={options}
-              plugins={[ChartDataLabels]}
+              plugins={[ChartDataLabels as Plugin<"bar", object>]}
             />
           </div>
         </div>

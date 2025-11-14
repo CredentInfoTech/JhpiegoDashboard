@@ -23,7 +23,7 @@ import {
   Title,
 } from "chart.js";
 import { Pie, Bar, Line } from "react-chartjs-2";
-import { DataGrid, } from "@mui/x-data-grid";
+import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import "./PartnershipDashboard.css";
 ChartJS.register(
   ArcElement,
@@ -96,14 +96,11 @@ type Partner = {
   parties: number;
   typeOfPartner: string;
   geography: string;
-  // validTill/createdOn can be null when fetched; mark optional and allow null
   validTill?: string | null;
   createdOn?: string | null;
-  // status may contain values beyond the strict union when source data is inconsistent
   status?: string;
   governingLaw?: string;
   objective?: string;
-  // additional optional fields used in the table
   contactPersonName?: string;
   signatory?: string;
   typeOfInstrument?: string;
@@ -121,7 +118,7 @@ export default function PartnershipDashboardTwo(props: any) {
     closed: boolean;
   }>({ valid: false, closed: false });
   const [filterClosed, setFilterClosed] = useState<boolean>(false);
-  const [partners, setPartners] = useState<Partner[]>([]); // State to store fetched data
+  const [partners, setPartners] = useState<Partner[]>([]); 
   const operationalPartnership = "PartnershipDetails";
   // const [showAll, setShowAll] = useState<boolean>(false);
 
@@ -149,7 +146,7 @@ export default function PartnershipDashboardTwo(props: any) {
           typeOfInstrument: item.TypeOfInstrument || "N/A",
           objective: item.Objective || "N/A",
         }));
-        setPartners(formattedItems); // Update state with fetched data
+        setPartners(formattedItems); 
       } catch (error) {
         console.error(
           "Error fetching data from operationalPartnership list:",
@@ -217,7 +214,6 @@ export default function PartnershipDashboardTwo(props: any) {
     return arr;
   }, [filtered]);
 
-  // Modify the contractsChart logic to show all contracts by default
   const contractsChart = useMemo(() => {
     const today = new Date();
     const todayStart = new Date(
@@ -241,7 +237,6 @@ export default function PartnershipDashboardTwo(props: any) {
     return arr;
   }, [filtered]);
 
-  // Update the Contracts by Status chart to use green for Active and red for Closed
   const statusData = useMemo(
     () => ({
       // labels: statusChart.map((s) => `${s.name} (${s.value})`),
@@ -268,7 +263,7 @@ export default function PartnershipDashboardTwo(props: any) {
         {
           data: contractsChart.map((c) => c.value),
           backgroundColor: contractsChart.map(
-            (c) => (c.name === "Valid" ? "#f7c948" : "#f4577b") // Yellow for Valid, Red for Expired
+            (c) => (c.name === "Valid" ? "#f7c948" : "#f4577b") 
           ),
           hoverOffset: 8,
         },
@@ -346,14 +341,12 @@ export default function PartnershipDashboardTwo(props: any) {
 
   const upcomingValidTill = useMemo(() => {
     const now = new Date();
-    // Collect future validTill dates from filtered partners, group by date and count
     const map = new Map<string, number>();
     filtered.forEach((p) => {
       if (!p.validTill) return;
       const d = new Date(p.validTill);
       if (isNaN(d.getTime())) return;
-      if (d <= now) return; // only future dates
-      // use ISO date (YYYY-MM-DD) as key to group by day
+      if (d <= now) return; 
       const key = d.toISOString().slice(0, 10);
       map.set(key, (map.get(key) || 0) + 1);
     });
@@ -361,7 +354,7 @@ export default function PartnershipDashboardTwo(props: any) {
     const arr: { name: string; value: number }[] = [];
     map.forEach((value, key) => arr.push({ name: key, value }));
     arr.sort((a, b) => new Date(a.name).getTime() - new Date(b.name).getTime());
-    return arr.slice(0, 12); // Take the next 12 entries
+    return arr.slice(0, 12); 
   }, [filtered]);
 
   const timeData = useMemo(
@@ -381,7 +374,6 @@ export default function PartnershipDashboardTwo(props: any) {
     [upcomingValidTill]
   );
 
-  // Add a new chart for Partners by Type
   const typeChart = useMemo(() => {
     const map = new Map<string, number>();
     filtered.forEach((p) => {
@@ -406,7 +398,6 @@ export default function PartnershipDashboardTwo(props: any) {
     [typeChart]
   );
 
-  // style objects
   // const baseShadow = "0 4px 20px rgba(88,101,242,0.08)";
   const surfaceShadow = "0 2px 12px rgba(88,101,242,0.08)";
   const sectionBorder = "2px solid #e3e7fa";
@@ -433,7 +424,6 @@ export default function PartnershipDashboardTwo(props: any) {
     transition: "transform 0.2s, box-shadow 0.2s",
   };
 
-  // Adjust layout for 'Partners by Type'
   // const PartnersByType = () => (
   //   <div style={{ display: "flex", alignItems: "center", padding: "24px" }}>
   //     {/* Chart on the left */}
@@ -504,7 +494,7 @@ export default function PartnershipDashboardTwo(props: any) {
   //     plugins: {
   //       ...commonOptions.plugins,
   //       // legend: {
-  //       //   display: false,  // 🔥 Hides the labels below the pie chart
+  //       //   display: false,  
   //       // },
   //       legend: {
   //   display: true,
@@ -537,9 +527,9 @@ export default function PartnershipDashboardTwo(props: any) {
   //       style={{
   //         flex: "0 0 60%",
   //         paddingLeft: "20px",
-  //         maxHeight: "300px", // Set a specific height
-  //         overflowY: "auto", // Enable scrolling
-  //         border: "1px solid #e3e7fa", // Optional: Add a border for clarity
+  //         maxHeight: "300px", 
+  //         overflowY: "auto", 
+  //         border: "1px solid #e3e7fa", 
   //         borderRadius: "8px",
   //         padding: "10px",
   //       }}
@@ -585,7 +575,7 @@ export default function PartnershipDashboardTwo(props: any) {
   //       style={{
   //         display: "flex",
   //         width: "100%",
-  //         maxWidth: "900px", // ensure enough space
+  //         maxWidth: "900px",
   //         justifyContent: "center",
   //       }}
   //     >
@@ -622,7 +612,7 @@ export default function PartnershipDashboardTwo(props: any) {
   //             },
   //           },
   //         }}
-  //         height={350} // required for proper legend wrapping
+  //         height={350} 
   //       />
   //     </div>
   //   </div>
@@ -648,7 +638,7 @@ export default function PartnershipDashboardTwo(props: any) {
             options={{
               ...commonOptions,
               plugins: {
-                legend: { display: false }, // ❗ hide default legend
+                legend: { display: false },
                 tooltip: {
                   callbacks: {
                     label: function (tooltipItem) {
@@ -699,7 +689,6 @@ export default function PartnershipDashboardTwo(props: any) {
 
           {/* Scrollable Content */}
           {typeData.labels.map((label: string, index: number) => {
-            // Ensure the backgroundColor array has enough colors
             const backgroundColor =
               typeData.datasets[0].backgroundColor[
                 index % typeData.datasets[0].backgroundColor.length
@@ -803,7 +792,7 @@ export default function PartnershipDashboardTwo(props: any) {
         <div
           style={{
             display: "flex",
-            gap: "19px",
+            gap: "10px",
             alignItems: "center",
             flexWrap: "wrap",
           }}
@@ -982,8 +971,6 @@ export default function PartnershipDashboardTwo(props: any) {
               setFilterActive(false);
               setFilterClosed(false);
               setContracts({ valid: false, closed: false });
-              // Clear filtered data
-              // setFiltered([]);
             }}
             style={{
               ...buttonStyle,
@@ -1412,13 +1399,13 @@ export default function PartnershipDashboardTwo(props: any) {
                 width: 150,
               },
             ]}
-            showToolbar
+            components={{ Toolbar: GridToolbar }}
             initialState={{
               pagination: { paginationModel: { page: 0, pageSize: 10 } },
             }}
             pageSizeOptions={[10, 20, 50]}
             sx={{
-              "& .MuiDataGrid-columnHeader, & .MuiDataGrid-columnHeader--sortable, & .MuiDataGrid-withBorderColor":
+              "& .MuiDataGrid-columnHeader":
                 {
                   background: "#4b91f1 !important",
                 },
@@ -1435,8 +1422,10 @@ export default function PartnershipDashboardTwo(props: any) {
               },
 
               /* 🔥 Custom Scrollbar */
+              
               "& .MuiDataGrid-virtualScroller::-webkit-scrollbar": {
                 width: "8px ",
+                height:"8px"
               },
               "& .MuiDataGrid-virtualScroller::-webkit-scrollbar-track": {
                 background: "#e4e7ec",
