@@ -25,6 +25,7 @@ import {
 import { Pie, Bar, Line } from "react-chartjs-2";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import "./PartnershipDashboard.css";
+
 ChartJS.register(
   ArcElement,
   ChartTooltip,
@@ -44,12 +45,35 @@ const commonOptions: any = {
     legend: {
       position: "bottom",
       labels: {
-        boxWidth: 12,
-        padding: 8,
+        boxWidth: 14,
+        padding: 12,
+        font: {
+          size: 13,
+          weight: '600',
+        },
+        color: '#1e293b',
+        usePointStyle: true,
+        pointStyle: 'circle',
       },
     },
     tooltip: {
       enabled: true,
+      backgroundColor: 'rgba(30, 41, 59, 0.95)',
+      titleColor: '#fff',
+      bodyColor: '#fff',
+      padding: 14,
+      borderColor: 'rgba(102, 126, 234, 0.5)',
+      borderWidth: 2,
+      cornerRadius: 10,
+      titleFont: {
+        size: 14,
+        weight: 'bold',
+      },
+      bodyFont: {
+        size: 13,
+      },
+      displayColors: true,
+      boxPadding: 6,
     },
   },
 };
@@ -59,16 +83,42 @@ const barOptions: any = {
   maintainAspectRatio: false,
   plugins: {
     legend: { display: false },
-    tooltip: { enabled: true },
+    tooltip: { 
+      enabled: true,
+      backgroundColor: 'rgba(30, 41, 59, 0.95)',
+      padding: 14,
+      cornerRadius: 10,
+      borderColor: 'rgba(102, 126, 234, 0.5)',
+      borderWidth: 2,
+      titleFont: {
+        size: 14,
+        weight: 'bold',
+      },
+      bodyFont: {
+        size: 13,
+      },
+    },
   },
   scales: {
     x: {
       grid: { display: false },
-      ticks: { autoSkip: false },
+      ticks: { 
+        autoSkip: false,
+        color: '#64748b',
+        font: { size: 11, weight: '500' }
+      },
     },
     y: {
       beginAtZero: true,
-      ticks: { precision: 0 },
+      ticks: { 
+        precision: 0,
+        color: '#64748b',
+        font: { weight: '500' }
+      },
+      grid: {
+        color: 'rgba(102, 126, 234, 0.1)',
+        drawBorder: false,
+      },
     },
   },
 };
@@ -78,15 +128,58 @@ const lineOptions: any = {
   maintainAspectRatio: false,
   plugins: {
     legend: { display: false },
-    tooltip: { enabled: true },
+    tooltip: { 
+      enabled: true,
+      backgroundColor: 'rgba(30, 41, 59, 0.95)',
+      padding: 14,
+      cornerRadius: 10,
+      borderColor: 'rgba(102, 126, 234, 0.5)',
+      borderWidth: 2,
+      titleFont: {
+        size: 14,
+        weight: 'bold',
+      },
+      bodyFont: {
+        size: 13,
+      },
+    },
   },
   scales: {
-    x: { grid: { display: false } },
-    y: { beginAtZero: true, ticks: { precision: 0 } },
+    x: { 
+      grid: { 
+        display: true,
+        color: 'rgba(102, 126, 234, 0.08)',
+        drawBorder: false,
+      },
+      ticks: {
+        color: '#64748b',
+        font: { size: 11, weight: '500' }
+      }
+    },
+    y: { 
+      beginAtZero: true, 
+      ticks: { 
+        precision: 0,
+        color: '#64748b',
+        font: { weight: '500' }
+      },
+      grid: {
+        color: 'rgba(102, 126, 234, 0.1)',
+        drawBorder: false,
+      },
+    },
   },
   elements: {
-    point: { radius: 3 },
-    line: { tension: 0.3 },
+    point: { 
+      radius: 5, 
+      hoverRadius: 8,
+      backgroundColor: '#667eea',
+      borderWidth: 3,
+    },
+    line: { 
+      tension: 0.4,
+      borderWidth: 3,
+    },
   },
 };
 
@@ -106,7 +199,11 @@ type Partner = {
   typeOfInstrument?: string;
 };
 
-const COLORS = ["#5865f2", "#4b91f1", "#a680be", "#4f709c", "#30aabc"];
+// const COLORS = [
+//   "#667eea", "#764ba2", "#f093fb", "#4facfe", 
+//   "#43e97b", "#fa709a", "#fee140", "#30cfd0",
+//   "#a8edea", "#fed6e3", "#c471f5", "#fa8bff"
+// ];
 
 export default function PartnershipDashboardTwo(props: any) {
   const [from, setFrom] = useState<string>("");
@@ -120,7 +217,6 @@ export default function PartnershipDashboardTwo(props: any) {
   const [filterClosed, setFilterClosed] = useState<boolean>(false);
   const [partners, setPartners] = useState<Partner[]>([]); 
   const operationalPartnership = "PartnershipDetails";
-  // const [showAll, setShowAll] = useState<boolean>(false);
 
   // Fetch data from the operationalPartnership list
   useEffect(() => {
@@ -197,15 +293,12 @@ export default function PartnershipDashboardTwo(props: any) {
     });
   }, [from, to, geography, filterActive, filterClosed, contracts, partners]);
 
-  // Modify the status chart to show Active and Status Closed Request
   const statusChart = useMemo(() => {
     const map = new Map<string, number>();
     filtered.forEach((p) => {
       if (p.status === "Active") {
-        // map.set("Active", (map.get("Active") || 0) + 1);
         map.set("Active", (map.get("Active") || 0) + 1);
       } else if (p.status === "Inactive") {
-        // map.set("Status Closed Request", (map.get("Status Closed Request") || 0) + 1);
         map.set("Inactive", (map.get("Inactive") || 0) + 1);
       }
     });
@@ -239,55 +332,50 @@ export default function PartnershipDashboardTwo(props: any) {
 
   const statusData = useMemo(
     () => ({
-      // labels: statusChart.map((s) => `${s.name} (${s.value})`),
       labels: statusChart.map((s) => `${s.name}`),
       datasets: [
         {
           data: statusChart.map((s) => s.value),
-          backgroundColor: statusChart.map(
-            (s) => (s.name === "Active" ? "#55ac83" : "#f4577b") // Green for Active, Red for Closed
+          backgroundColor: statusChart.map((s) => 
+            s.name === "Active" 
+              ? "rgba(67, 233, 123, 0.85)" // Vibrant green
+              : "rgba(244, 87, 123, 0.85)" // Coral red
           ),
-          hoverOffset: 8,
+          borderColor: statusChart.map((s) => 
+            s.name === "Active" ? "#43e97b" : "#f4577b"
+          ),
+          borderWidth: 2,
+          hoverOffset: 12,
+          hoverBorderWidth: 3,
         },
       ],
     }),
     [statusChart]
   );
 
-  // Update the Contracts (Valid / Expired) chart to use yellow for Valid and red for Expired
   const contractsData = useMemo(
     () => ({
-      // labels: contractsChart.map((c) => `${c.name} (${c.value})`),
       labels: contractsChart.map((c) => `${c.name}`),
       datasets: [
         {
           data: contractsChart.map((c) => c.value),
-          backgroundColor: contractsChart.map(
-            (c) => (c.name === "Valid" ? "#f7c948" : "#f4577b") 
+          backgroundColor: contractsChart.map((c) =>
+            c.name === "Valid" 
+              ? "rgba(254, 225, 64, 0.85)" // Golden yellow
+              : "rgba(244, 87, 123, 0.85)" // Coral red
           ),
-          hoverOffset: 8,
+          borderColor: contractsChart.map((c) =>
+            c.name === "Valid" ? "#fee140" : "#f4577b"
+          ),
+          borderWidth: 2,
+          hoverOffset: 12,
+          hoverBorderWidth: 3,
         },
       ],
     }),
     [contractsChart]
   );
 
-  // chart data objects
-  // const statusData = useMemo(
-  //   () => ({
-  //     labels: statusChart.map((s) => s.name),
-  //     datasets: [
-  //       {
-  //         data: statusChart.map((s) => s.value),
-  //         backgroundColor: COLORS.slice(0, statusChart.length),
-  //         hoverOffset: 8,
-  //       },
-  //     ],
-  //   }),
-  //   [statusChart]
-  // );
-
-  // derive geography chart data from filtered list
   const geoChart = useMemo(() => {
     const map = new Map<string, number>();
     filtered.forEach((p) => {
@@ -298,33 +386,6 @@ export default function PartnershipDashboardTwo(props: any) {
     return arr;
   }, [filtered]);
 
-  // derive time series chart (group by YYYY-MM) from createdOn
-  // const timeChart = useMemo(() => {
-  //   const map = new Map<string, number>();
-  //   const today = new Date();
-  //   const oneYearAgo = new Date(today.getFullYear() - 1, today.getMonth(), today.getDate());
-
-  //   filtered.forEach((p) => {
-  //     if (!p.createdOn) return;
-  //     const createdDate = new Date(p.createdOn);
-  //     if (createdDate < oneYearAgo) return; // Exclude data older than 12 months
-
-  //     const month = (createdDate.getMonth() + 1).toString();
-  //     const key = `${createdDate.getFullYear()}-${("0" + month).slice(-2)}`;
-  //     map.set(key, (map.get(key) || 0) + 1);
-  //   });
-
-  //   // Sort keys ascending
-  //   const keysArr: string[] = [];
-  //   map.forEach((_, k) => keysArr.push(k));
-  //   const keys = keysArr.sort();
-  //   const arr: { name: string; value: number }[] = keys.map((k) => ({
-  //     name: k,
-  //     value: map.get(k) || 0,
-  //   }));
-  //   return arr;
-  // }, [filtered]);
-
   const geoData = useMemo(
     () => ({
       labels: geoChart.map((g) => g.name),
@@ -332,7 +393,41 @@ export default function PartnershipDashboardTwo(props: any) {
         {
           label: "Partners",
           data: geoChart.map((g) => g.value),
-          backgroundColor: geoChart.map((_, i) => COLORS[i % COLORS.length]),
+          backgroundColor: geoChart.map((_, i) => {
+            const colors = [
+              "rgba(102, 126, 234, 0.85)",
+              "rgba(118, 75, 162, 0.85)",
+              "rgba(240, 147, 251, 0.85)",
+              "rgba(79, 172, 254, 0.85)",
+              "rgba(67, 233, 123, 0.85)",
+              "rgba(250, 112, 154, 0.85)",
+              "rgba(254, 225, 64, 0.85)",
+              "rgba(48, 207, 208, 0.85)",
+            ];
+            return colors[i % colors.length];
+          }),
+          borderColor: geoChart.map((_, i) => {
+            const colors = [
+              "#667eea", "#764ba2", "#f093fb", "#4facfe",
+              "#43e97b", "#fa709a", "#fee140", "#30cfd0"
+            ];
+            return colors[i % colors.length];
+          }),
+          borderWidth: 2,
+          borderRadius: 12,
+          hoverBackgroundColor: geoChart.map((_, i) => {
+            const colors = [
+              "rgba(102, 126, 234, 1)",
+              "rgba(118, 75, 162, 1)",
+              "rgba(240, 147, 251, 1)",
+              "rgba(79, 172, 254, 1)",
+              "rgba(67, 233, 123, 1)",
+              "rgba(250, 112, 154, 1)",
+              "rgba(254, 225, 64, 1)",
+              "rgba(48, 207, 208, 1)",
+            ];
+            return colors[i % colors.length];
+          }),
         },
       ],
     }),
@@ -364,10 +459,19 @@ export default function PartnershipDashboardTwo(props: any) {
         {
           label: "Contracts",
           data: upcomingValidTill.map((t) => t.value),
-          borderColor: "#5865f2",
-          backgroundColor: "rgba(88, 101, 242, 0.15)",
+          borderColor: "#667eea",
+          backgroundColor: "rgba(102, 126, 234, 0.2)",
           fill: true,
-          tension: 0.3,
+          tension: 0.4,
+          borderWidth: 3,
+          pointBackgroundColor: "#667eea",
+          pointBorderColor: "#fff",
+          pointBorderWidth: 3,
+          pointRadius: 6,
+          pointHoverRadius: 9,
+          pointHoverBackgroundColor: "#764ba2",
+          pointHoverBorderColor: "#fff",
+          pointHoverBorderWidth: 3,
         },
       ],
     }),
@@ -390,233 +494,39 @@ export default function PartnershipDashboardTwo(props: any) {
       datasets: [
         {
           data: typeChart.map((t) => t.value),
-          backgroundColor: COLORS.slice(0, typeChart.length),
-          hoverOffset: 8,
+          backgroundColor: typeChart.map((_, i) => {
+            const colors = [
+              "rgba(102, 126, 234, 0.85)",
+              "rgba(118, 75, 162, 0.85)",
+              "rgba(240, 147, 251, 0.85)",
+              "rgba(79, 172, 254, 0.85)",
+              "rgba(67, 233, 123, 0.85)",
+              "rgba(250, 112, 154, 0.85)",
+              "rgba(254, 225, 64, 0.85)",
+              "rgba(48, 207, 208, 0.85)",
+              "rgba(168, 237, 234, 0.85)",
+              "rgba(254, 214, 227, 0.85)",
+              "rgba(196, 113, 245, 0.85)",
+              "rgba(250, 139, 255, 0.85)",
+            ];
+            return colors[i % colors.length];
+          }),
+          borderColor: typeChart.map((_, i) => {
+            const colors = [
+              "#667eea", "#764ba2", "#f093fb", "#4facfe",
+              "#43e97b", "#fa709a", "#fee140", "#30cfd0",
+              "#a8edea", "#fed6e3", "#c471f5", "#fa8bff"
+            ];
+            return colors[i % colors.length];
+          }),
+          borderWidth: 2,
+          hoverOffset: 12,
+          hoverBorderWidth: 3,
         },
       ],
     }),
     [typeChart]
   );
-
-  // const baseShadow = "0 4px 20px rgba(88,101,242,0.08)";
-  const surfaceShadow = "0 2px 12px rgba(88,101,242,0.08)";
-  const sectionBorder = "2px solid #e3e7fa";
-
-  const inputStyle = {
-    padding: "10px 14px",
-    border: "1px solid #d1d9f0",
-    borderRadius: "8px",
-    fontSize: "14px",
-    transition: "box-shadow 0.2s, border-color 0.2s",
-    background: "#f8fafc",
-    color: "#23263b",
-  };
-  const buttonStyle = {
-    padding: "9px 20px",
-    background: "linear-gradient(90deg, #5865f2 30%, #675dcd 100%)",
-    color: "#fff",
-    border: "none",
-    borderRadius: "8px",
-    fontSize: "15px",
-    fontWeight: "500",
-    cursor: "pointer",
-    boxShadow: "0 2px 12px rgba(88, 101, 242, 0.14)",
-    transition: "transform 0.2s, box-shadow 0.2s",
-  };
-
-  // const PartnersByType = () => (
-  //   <div style={{ display: "flex", alignItems: "center", padding: "24px" }}>
-  //     {/* Chart on the left */}
-  //     <div style={{ flex: 1 }}>
-  //       <Pie
-  //         data={typeData}
-  //         options={{
-  //           ...commonOptions,
-  //           plugins: {
-  //             ...commonOptions.plugins,
-  //             tooltip: {
-  //               callbacks: {
-  //                 label: function (tooltipItem) {
-  //                   const dataset = tooltipItem.dataset;
-  //                   const total = dataset.data.reduce(
-  //                     (acc, value) => acc + value,
-  //                     0
-  //                   );
-  //                   const value = dataset.data[tooltipItem.dataIndex];
-  //                   const percentage = ((value / total) * 100).toFixed(2);
-  //                   return `${tooltipItem.label}: ${percentage}% (${value})`;
-  //                 },
-  //               },
-  //             },
-  //           },
-  //         }}
-  //       />
-  //     </div>
-
-  //     {/* Names with counts on the right */}
-  //     <div style={{ flex: 1, paddingLeft: "20px" }}>
-  //       {typeChart.map((t) => (
-  //         <div
-  //           key={t.name}
-  //           style={{
-  //             display: "flex",
-  //             justifyContent: "space-between",
-  //             marginBottom: "8px",
-  //             fontSize: "14px",
-  //             fontWeight: "600",
-  //             color: "#4f709c",
-  //           }}
-  //         >
-  //           <span>{t.name}</span>
-  //           <span>{t.value}</span>
-  //         </div>
-  //       ))}
-  //     </div>
-  //   </div>
-  // );
-
-  //   const PartnersByType = () => (
-  //   <div
-  //     style={{
-  //       display: "flex",
-  //       alignItems: "flex-start",
-  //       justifyContent: "space-between",
-  //       padding: "24px",
-  //       gap: "20px",
-  //     }}
-  //   >
-  //     {/* Chart on the left */}
-  //     <div style={{ flex: "0 0 40%", display: "flex", justifyContent: "center" }}>
-  //       <Pie
-  //   data={typeData}
-  //   options={{
-  //     ...commonOptions,
-  //     plugins: {
-  //       ...commonOptions.plugins,
-  //       // legend: {
-  //       //   display: false,  
-  //       // },
-  //       legend: {
-  //   display: true,
-  //   position: "right",
-  //   labels: {
-  //     usePointStyle: true,
-  //     padding: 20,
-  //   },
-  // },
-
-  //       tooltip: {
-  //         callbacks: {
-  //           label: function (tooltipItem) {
-  //             const dataset = tooltipItem.dataset;
-  //             const total = dataset.data.reduce((acc, value) => acc + value, 0);
-  //             const value = dataset.data[tooltipItem.dataIndex];
-  //             const percentage = ((value / total) * 100).toFixed(2);
-  //             return `${tooltipItem.label}: ${percentage}% (${value})`;
-  //           },
-  //         },
-  //       },
-  //     },
-  //   }}
-  // />
-
-  //     </div>
-
-  //     {/* Labels on the right */}
-  //     <div
-  //       style={{
-  //         flex: "0 0 60%",
-  //         paddingLeft: "20px",
-  //         maxHeight: "300px", 
-  //         overflowY: "auto", 
-  //         border: "1px solid #e3e7fa", 
-  //         borderRadius: "8px",
-  //         padding: "10px",
-  //       }}
-  //     >
-  //       {typeChart.map((t, index) => (
-  //         <div
-  //           key={index}
-  //           style={{
-  //             display: "flex",
-  //             alignItems: "center",
-  //             marginBottom: "8px",
-  //             fontSize: "14px",
-  //             fontWeight: "600",
-  //             color: "#4f709c",
-  //           }}
-  //         >
-  //           <div
-  //             style={{
-  //               width: "12px",
-  //               height: "12px",
-  //               backgroundColor: COLORS[index % COLORS.length],
-  //               marginRight: "8px",
-  //             }}
-  //           />
-  //           <span style={{ flex: 1 }}>{t.name}</span>
-  //           <span>{t.value}</span>
-  //         </div>
-  //       ))}
-  //     </div>
-  //   </div>
-  // );
-
-  // const PartnersByType = () => (
-  //   <div
-  //     style={{
-  //       display: "flex",
-  //       justifyContent: "center",
-  //       padding: "24px",
-  //       width: "100%",
-  //     }}
-  //   >
-  //     <div
-  //       style={{
-  //         display: "flex",
-  //         width: "100%",
-  //         maxWidth: "900px",
-  //         justifyContent: "center",
-  //       }}
-  //     >
-  //       <Pie
-  //         data={typeData}
-  //         options={{
-  //           ...commonOptions,
-  //           maintainAspectRatio: false,
-  //           plugins: {
-  //             ...commonOptions.plugins,
-  //             legend: {
-  //               display: true,
-  //               position: "right",
-  //               fullSize: true,
-  //               labels: {
-  //                 usePointStyle: true,
-  //                 padding: 18,
-  //                 boxWidth: 12,
-  //                 font: {
-  //                   size: 13,
-  //                 },
-  //               },
-  //             },
-  //             tooltip: {
-  //               callbacks: {
-  //                 label: function (tooltipItem) {
-  //                   const dataset = tooltipItem.dataset;
-  //                   const total = dataset.data.reduce((acc, v) => acc + v, 0);
-  //                   const value = dataset.data[tooltipItem.dataIndex];
-  //                   const percentage = ((value / total) * 100).toFixed(2);
-  //                   return `${tooltipItem.label}: ${percentage}% (${value})`;
-  //                 },
-  //               },
-  //             },
-  //           },
-  //         }}
-  //         height={350} 
-  //       />
-  //     </div>
-  //   </div>
-  // );
 
   const PartnersByType = () => {
     const legendRef = React.useRef<HTMLDivElement>(null);
@@ -631,7 +541,6 @@ export default function PartnershipDashboardTwo(props: any) {
           width: "100%",
         }}
       >
-        {/* Pie Chart */}
         <div style={{ width: "45%" }}>
           <Pie
             data={typeData}
@@ -656,7 +565,6 @@ export default function PartnershipDashboardTwo(props: any) {
           />
         </div>
 
-        {/* Scrollable Legend with Headings */}
         <div
           ref={legendRef}
           className="chart-scrollbar"
@@ -665,29 +573,29 @@ export default function PartnershipDashboardTwo(props: any) {
             maxHeight: "300px",
             overflowY: "auto",
             padding: "12px",
-            border: "1px solid #e3e7fa",
-            borderRadius: "8px",
-            background: "#fafbff",
+            border: "2px solid #e2e8f0",
+            borderRadius: "12px",
+            background: "#ffffff",
           }}
         >
-          {/* Headings */}
           <div
             style={{
               display: "flex",
               justifyContent: "space-between",
-              padding: "6px 0",
-              fontSize: "14px",
+              padding: "8px 0",
+              fontSize: "13px",
               fontWeight: "700",
-              color: "#3a4b6b",
-              borderBottom: "1px solid #e3e7fa",
-              marginBottom: "8px",
+              color: "#1e293b",
+              borderBottom: "2px solid #e2e8f0",
+              marginBottom: "12px",
+              textTransform: "uppercase",
+              letterSpacing: "0.5px",
             }}
           >
-            <span>Name</span>
+            <span>Partner Type</span>
             <span>Count</span>
           </div>
 
-          {/* Scrollable Content */}
           {typeData.labels.map((label: string, index: number) => {
             const backgroundColor =
               typeData.datasets[0].backgroundColor[
@@ -700,26 +608,41 @@ export default function PartnershipDashboardTwo(props: any) {
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  padding: "6px 0",
+                  padding: "10px 0",
                   fontSize: "14px",
-                  color: "#3a4b6b",
+                  color: "#475569",
                   fontWeight: 500,
-                  borderBottom: "1px solid #eee",
+                  borderBottom: "1px solid #f1f5f9",
+                  transition: "all 0.2s ease",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "#f8fafc";
+                  e.currentTarget.style.transform = "translateX(4px)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "transparent";
+                  e.currentTarget.style.transform = "translateX(0)";
                 }}
               >
                 <div
                   style={{
-                    width: "12px",
-                    height: "12px",
+                    width: "14px",
+                    height: "14px",
                     borderRadius: "50%",
                     backgroundColor: backgroundColor,
-                    marginRight: "10px",
+                    marginRight: "12px",
+                    flexShrink: 0,
+                    boxShadow: `0 2px 8px ${backgroundColor}40`,
                   }}
                 ></div>
 
-                <span style={{ flex: 1 }}>{label}</span>
+                <span style={{ flex: 1, color: "#1e293b", fontWeight: 600 }}>{label}</span>
 
-                <span style={{ fontWeight: "600" }}>
+                <span style={{ 
+                  fontWeight: "700", 
+                  color: "#5865f2",
+                  fontSize: "15px",
+                }}>
                   {typeData.datasets[0].data[index]}
                 </span>
               </div>
@@ -733,715 +656,570 @@ export default function PartnershipDashboardTwo(props: any) {
   return (
     <div
       style={{
-        fontFamily:
-          "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-        // background: "linear-gradient(120deg, #e3eafc 50%, #f8fafb 100%)",
+        fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+        background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
         minHeight: "100vh",
-        padding: "12px",
+        padding: "40px 20px",
       }}
     >
-      {/* Header */}
-      {/* <div style={{
-                background: "linear-gradient(90deg, #4b91f1 0%, #8e9ae6 100%)",
-                padding: "26px 38px",
-                borderRadius: "14px",
-                marginBottom: "28px",
-                boxShadow: baseShadow,
-                position: "relative",
-                overflow: "hidden"
-            }}>
-                <h1 style={{
-                    margin: 0,
-                    color: "#fff",
-                    fontSize: "32px",
-                    fontWeight: "800",
-                    letterSpacing: "-1px",
-                    lineHeight: 1.2
-                }}>
-                    Partnership Dashboard
-                </h1>
-                <div style={{
-                    marginTop: "7px",
-                    color: "#e7ecfa",
-                    fontSize: "16px",
-                    fontWeight: 500,
-                    textShadow: "0 1px 0 #4b91f1"
-                }}>Strategically analyze and manage contracts and partners</div>
-                <div style={{
-                    position: "absolute",
-                    top: 0, right: 0, width: 120, height: 120,
-                    background: "radial-gradient(circle, #b8bdfc12 50%, transparent 80%)"
-                }}/>
-            </div> */}
-
-      {/* Filters */}
-      <div
-        style={{
-          background: "#fff",
-          borderRadius: "13px",
-          padding: "12px",
-          // marginBottom: "20px",
-          marginBottom: "12px",
-          boxShadow: surfaceShadow,
-          border: sectionBorder,
-        }}
-      >
-        {/* <div style={{ fontSize: "17px", fontWeight: "700", marginBottom: "19px", color: "#23263b" }}>
-                    Filters
-                </div> */}
-        <div
-          style={{
-            display: "flex",
-            gap: "10px",
-            alignItems: "center",
-            flexWrap: "wrap",
-          }}
-        >
-          <label
-            style={{ display: "flex", flexDirection: "column", gap: "8px" }}
-          >
-            <span
-              style={{ fontSize: "14px", fontWeight: "600", color: "#5f6ab8" }}
-            >
-              From
-            </span>
-            <input
-              type="date"
-              value={from}
-              onChange={(e) => setFrom(e.target.value)}
-              style={inputStyle}
-            />
-          </label>
-          <label
-            style={{ display: "flex", flexDirection: "column", gap: "8px" }}
-          >
-            <span
-              style={{ fontSize: "14px", fontWeight: "600", color: "#5f6ab8" }}
-            >
-              To
-            </span>
-            <input
-              type="date"
-              value={to}
-              onChange={(e) => setTo(e.target.value)}
-              style={inputStyle}
-            />
-          </label>
-          <label
-            style={{ display: "flex", flexDirection: "column", gap: "8px" }}
-          >
-            <span
-              style={{ fontSize: "14px", fontWeight: "600", color: "#5f6ab8" }}
-            >
-              Geography
-            </span>
-            <select
-              value={geography}
-              onChange={(e) => setGeography(e.target.value)}
-              style={inputStyle}
-            >
-              {geographyOptions.map((g) => (
-                <option key={g} value={g}>
-                  {g}
-                </option>
-              ))}
-            </select>
-          </label>
-          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-            <span
-              style={{ fontSize: "14px", fontWeight: "600", color: "#5f6ab8" }}
-            >
-              Status
-            </span>
-            <div style={{ display: "flex", gap: "14px" }}>
-              <label
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "7px",
-                  cursor: "pointer",
-                }}
-              >
-                <input
-                  type="checkbox"
-                  checked={filterActive}
-                  onChange={(e) => setFilterActive(e.target.checked)}
-                  style={{
-                    width: "17px",
-                    height: "17px",
-                    cursor: "pointer",
-                    accentColor: "#4b91f1",
-                  }}
-                />
-                <span style={{ fontSize: "15px", color: "#23263b" }}>
-                  Active
-                </span>
-              </label>
-              <label
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "7px",
-                  cursor: "pointer",
-                }}
-              >
-                <input
-                  type="checkbox"
-                  checked={filterClosed}
-                  onChange={(e) => setFilterClosed(e.target.checked)}
-                  style={{
-                    width: "17px",
-                    height: "17px",
-                    cursor: "pointer",
-                    accentColor: "#4b91f1",
-                  }}
-                />
-                <span style={{ fontSize: "15px", color: "#23263b" }}>
-                  Inactive
-                </span>
-              </label>
-            </div>
-          </div>
-
-          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-            <span
-              style={{ fontSize: "14px", fontWeight: "600", color: "#5f6ab8" }}
-            >
-              Contracts (Valid / Closed)
-            </span>
-            <div style={{ display: "flex", gap: "14px" }}>
-              <label
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "7px",
-                  cursor: "pointer",
-                }}
-              >
-                <input
-                  type="checkbox"
-                  checked={contracts.valid}
-                  onChange={(e) =>
-                    setContracts({ ...contracts, valid: e.target.checked })
-                  }
-                  style={{
-                    width: "17px",
-                    height: "17px",
-                    cursor: "pointer",
-                    accentColor: "#30aabc",
-                  }}
-                />
-                <span style={{ fontSize: "15px", color: "#23263b" }}>
-                  Valid
-                </span>
-              </label>
-              <label
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "7px",
-                  cursor: "pointer",
-                }}
-              >
-                <input
-                  type="checkbox"
-                  checked={contracts.closed}
-                  onChange={(e) =>
-                    setContracts({ ...contracts, closed: e.target.checked })
-                  }
-                  style={{
-                    width: "17px",
-                    height: "17px",
-                    cursor: "pointer",
-                    accentColor: "#a680be",
-                  }}
-                />
-                <span style={{ fontSize: "15px", color: "#23263b" }}>
-                  Closed
-                </span>
-              </label>
-            </div>
-          </div>
-          {/* Update the clear filters button to reset all details and checkboxes */}
-          <button
-            onClick={() => {
-              setFrom("");
-              setTo("");
-              setGeography("All");
-              setFilterActive(false);
-              setFilterClosed(false);
-              setContracts({ valid: false, closed: false });
-            }}
-            style={{
-              ...buttonStyle,
-              marginLeft: "auto",
-              marginTop: "16px",
-              fontWeight: 600,
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = "translateY(-2px)";
-              e.currentTarget.style.boxShadow =
-                "0 6px 22px rgba(88, 101, 242, 0.26)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = "translateY(0)";
-              e.currentTarget.style.boxShadow = buttonStyle.boxShadow as string;
-            }}
-          >
-            Clear Filters
-          </button>
-        </div>
-      </div>
-
-      {/* Metrics Cards */}
-      {/* <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(220px,1fr))",
-          // gap: "24px",
-          gap: "15px",
-          // marginBottom: "32px"
-          marginBottom: "15px",
-        }}
-      >
-        {[
-          {
-            label: "Total Partners",
-            value: totals.totalPartners,
-            colors: ["#5865f2", "#4b91f1"],
-          },
-          {
-            label: "Active Partners",
-            value: totals.active,
-            colors: ["#30aabc", "#7bdff2"],
-          },
-          {
-            label: "Valid Contracts",
-            value: totals.valid,
-            colors: ["#7b6ced", "#a7daff"],
-          },
-          {
-            label: "Expiring (30d)",
-            value: totals.expiring,
-            colors: ["#ff9a76", "#ffcf8a"],
-          },
-          {
-            label: "Closed Contracts",
-            value: totals.closed,
-            colors: ["#f4577b", "#fcaf58"],
-          },
-        ].map((item, idx) => (
-          <div
-            key={item.label}
-            style={{
-              background: `linear-gradient(110deg, ${item.colors[0]} 0%, ${item.colors[1]} 100%)`,
-              // padding: "30px 0",
-              padding: "10px 0",
-              borderRadius: "13px",
-              color: "#fff",
-              boxShadow: baseShadow,
-              textAlign: "center",
-              transform: "scale(1)",
-              transition: "box-shadow 0.2s, transform 0.2s",
-              cursor: "pointer",
-            }}
-            onMouseEnter={(e) =>
-              (e.currentTarget.style.transform = "scale(1.04)")
-            }
-            onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
-          >
-            <div
-              style={{
-                fontSize: "15px",
-                fontWeight: 600,
-                opacity: 0.89,
-                marginBottom: "12px",
-                letterSpacing: 0,
-              }}
-            >
-              {item.label}
-            </div>
-            <div
-              style={{
-                fontSize: "37px",
-                fontWeight: 800,
-                letterSpacing: "-1px",
-                textShadow: "0 1px 0 #3740c7",
-              }}
-            >
-              {item.value}
-            </div>
-          </div>
-        ))}
-      </div> */}
-
-      {/* Charts Section */}
-      <div
-        style={{
-          display: "grid",
-          // gridTemplateColumns: "repeat(auto-fit, minmax(350px, 1fr))",
-          gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-          // gap: "24px",
-          gap: "15px",
-          marginBottom: "32px",
-        }}
-      >
-        <div
-          style={{
-            background: "#f8fafc",
-            borderRadius: "13px",
-            padding: "24px",
-            // padding: "10px",
-            border: sectionBorder,
-            boxShadow: surfaceShadow,
-            transition: "box-shadow 0.2s",
-          }}
-          onMouseEnter={(e) =>
-            (e.currentTarget.style.boxShadow = "0 5px 26px #5865f21a")
-          }
-          onMouseLeave={(e) =>
-            (e.currentTarget.style.boxShadow = surfaceShadow)
-          }
-        >
-          <div
-            style={{
-              fontSize: "17px",
-              fontWeight: 700,
-              marginBottom: "17px",
-              color: "#5865f2",
-            }}
-          >
-            Contracts by Status
-          </div>
-          <div style={{ height: 210 }}>
-            <Pie data={statusData} options={commonOptions as any} />
-          </div>
-        </div>
-        <div
-          style={{
-            background: "#f8fafc",
-            borderRadius: "13px",
-            padding: "24px",
-            border: sectionBorder,
-            boxShadow: surfaceShadow,
-            transition: "box-shadow 0.2s",
-          }}
-          onMouseEnter={(e) =>
-            (e.currentTarget.style.boxShadow = "0 5px 26px #5865f21a")
-          }
-          onMouseLeave={(e) =>
-            (e.currentTarget.style.boxShadow = surfaceShadow)
-          }
-        >
-          <div
-            style={{
-              fontSize: "17px",
-              fontWeight: 700,
-              marginBottom: "17px",
-              color: "#a680be",
-            }}
-          >
-            Contracts (Valid / Expired)
-          </div>
-          <div style={{ height: 210 }}>
-            <Pie data={contractsData} options={commonOptions as any} />
-          </div>
-        </div>
-        <div
-          style={{
-            background: "#f8fafc",
-            borderRadius: "13px",
-            padding: "24px",
-            border: sectionBorder,
-            boxShadow: surfaceShadow,
-            transition: "box-shadow 0.2s",
-          }}
-          onMouseEnter={(e) =>
-            (e.currentTarget.style.boxShadow = "0 5px 26px #5865f21a")
-          }
-          onMouseLeave={(e) =>
-            (e.currentTarget.style.boxShadow = surfaceShadow)
-          }
-        >
-          <div
-            style={{
-              fontSize: "17px",
-              fontWeight: 700,
-              marginBottom: "17px",
-              color: "#30aabc",
-            }}
-          >
-            Partners by Geography
-          </div>
-          <div style={{ height: 210 }}>
-            <Bar data={geoData} options={barOptions as any} />
-          </div>
-        </div>
-
-        {/* <div
-          style={{
-            background: "#f8fafc",
-            borderRadius: "13px",
-            padding: "24px",
-            border: sectionBorder,
-            boxShadow: surfaceShadow,
-            transition: "box-shadow 0.2s",
-          }}
-          onMouseEnter={(e) =>
-            (e.currentTarget.style.boxShadow = "0 5px 26px #5865f21a")
-          }
-          onMouseLeave={(e) =>
-            (e.currentTarget.style.boxShadow = surfaceShadow)
-          }
-        >
-          <div
-            style={{
-              fontSize: "17px",
-              fontWeight: 700,
-              marginBottom: "17px",
-              color: "#7b6ced",
-            }}
-          >
-            Contracts Created Over Time
-          </div>
-          <div style={{ height: 210 }}>
-            <Line data={timeData} options={lineOptions as any} />
-          </div>
-        </div>
-        <div
-          style={{
-            background: "#f8fafc",
-            borderRadius: "13px",
-            padding: "24px",
-            border: sectionBorder,
-            boxShadow: surfaceShadow,
-            transition: "box-shadow 0.2s",
-          }}
-          onMouseEnter={(e) =>
-            (e.currentTarget.style.boxShadow = "0 5px 26px #5865f21a")
-          }
-          onMouseLeave={(e) =>
-            (e.currentTarget.style.boxShadow = surfaceShadow)
-          }
-        >
-          <div
-            style={{
-              fontSize: "17px",
-              fontWeight: 700,
-              marginBottom: "17px",
-              color: "#4f709c",
-            }}
-          >
-            Partners by Type
-          </div>
-          <div style={{ height: 210 }}>
-            <Pie data={typeData} options={commonOptions as any} />
-          </div>
-        </div> */}
-      </div>
-      <div
-        style={{
-          display: "grid",
-          // gridTemplateColumns: "repeat(auto-fit, minmax(350px, 1fr))",
-          gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-          // gap: "24px",
-          gap: "15px",
-          marginBottom: "32px",
-        }}
-      >
-        <div
-          style={{
-            background: "#f8fafc",
-            borderRadius: "13px",
-            padding: "24px",
-            border: sectionBorder,
-            boxShadow: surfaceShadow,
-            transition: "box-shadow 0.2s",
-          }}
-          onMouseEnter={(e) =>
-            (e.currentTarget.style.boxShadow = "0 5px 26px #5865f21a")
-          }
-          onMouseLeave={(e) =>
-            (e.currentTarget.style.boxShadow = surfaceShadow)
-          }
-        >
-          <div
-            style={{
-              fontSize: "17px",
-              fontWeight: 700,
-              marginBottom: "17px",
-              color: "#7b6ced",
-            }}
-          >
-            Upcoming Valid Till
-          </div>
-          <div style={{ height: 210 }}>
-            <Line data={timeData} options={lineOptions as any} />
-          </div>
-        </div>
-
-        {/* <div
-          style={{
-            background: "#f8fafc",
-            borderRadius: "13px",
-            padding: "24px",
-            border: sectionBorder,
-            boxShadow: surfaceShadow,
-            transition: "box-shadow 0.2s",
-          }}
-          onMouseEnter={(e) =>
-            (e.currentTarget.style.boxShadow = "0 5px 26px #5865f21a")
-          }
-          onMouseLeave={(e) =>
-            (e.currentTarget.style.boxShadow = surfaceShadow)
-          }
-        >
-          <div
-            style={{
-              fontSize: "17px",
-              fontWeight: 700,
-              marginBottom: "17px",
-              color: "#4f709c",
-            }}
-          >
-            Partners by Type
-          </div>
-          <div style={{ height: 210 }}>
-            <Pie data={typeData} options={commonOptions as any} />
-          </div>
+      <div style={{ maxWidth: '1600px', margin: '0 auto' }}>
+        {/* Header */}
+        {/* <div style={{
+          marginBottom: '35px',
+          textAlign: 'center',
+        }}>
+          <h1 style={{
+            fontSize: '42px',
+            fontWeight: '800',
+            color: '#ffffff',
+            margin: '0 0 10px 0',
+            textShadow: '0 2px 10px rgba(0,0,0,0.2)',
+            letterSpacing: '-0.5px',
+          }}>
+            🤝 Partnership Dashboard
+          </h1>
+          <p style={{
+            fontSize: '16px',
+            color: 'rgba(255,255,255,0.9)',
+            margin: 0,
+            fontWeight: '500',
+          }}>
+            Strategically analyze and manage contracts and partners
+          </p>
         </div> */}
 
-        <div
-          style={{
-            background: "#f8fafc",
-            borderRadius: "13px",
-            padding: "24px",
-            border: sectionBorder,
-            boxShadow: surfaceShadow,
-            transition: "box-shadow 0.2s",
-          }}
-          onMouseEnter={(e) =>
-            (e.currentTarget.style.boxShadow = "0 5px 26px #5865f21a")
-          }
-          onMouseLeave={(e) =>
-            (e.currentTarget.style.boxShadow = surfaceShadow)
-          }
-        >
-          <div
-            style={{
-              fontSize: "17px",
-              fontWeight: 700,
-              marginBottom: "17px",
-              color: "#4f709c",
-            }}
-          >
-            Partners by Type
-          </div>
-          <PartnersByType />
-        </div>
-      </div>
+        {/* Filters */}
+        <div className="filter-card-partnership">
+           <div style={{ display: 'flex', alignItems: 'center', gap: '15px', flexWrap: 'wrap', marginBottom: 8, borderBottom: '1px solid', padding: 5 }}>
+            <div className="filter-icon-partnership">📊</div>
 
-      {/* Table Section */}
-      <div
-        style={{
-          background: "#fff",
-          borderRadius: "14px",
-          padding: "29px",
-          boxShadow: surfaceShadow,
-          border: sectionBorder,
-          overflow: "hidden",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: "17px",
-          }}
-        >
-          <div
-            style={{
-              fontSize: "20px",
-              fontWeight: 800,
-              color: "#23263b",
-            }}
-          >
-            Partnership Details
+               <button
+                onClick={() => {
+                  setFrom("");
+                  setTo("");
+                  setGeography("All");
+                  setFilterActive(false);
+                  setFilterClosed(false);
+                  setContracts({ valid: false, closed: false });
+                }}
+                className="clear-button-partnership"
+              >
+                🔄 Clear Filters
+              </button>
+            </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '15px', flexWrap: 'wrap' }}>
+           
+            
+            <div style={{ display: 'flex', alignItems: 'center', gap: '30px', flex: 1, flexWrap: 'wrap', justifyContent:'center' }}>
+              <div className="date-input-group-partnership">
+                <label>From Date</label>
+                <input
+                  type="date"
+                  value={from}
+                  onChange={(e) => setFrom(e.target.value)}
+                  className="date-input-partnership"
+                />
+              </div>
+
+              <div className="date-input-group-partnership">
+                <label>To Date</label>
+                <input
+                  type="date"
+                  value={to}
+                  onChange={(e) => setTo(e.target.value)}
+                  className="date-input-partnership"
+                />
+              </div>
+
+              <div className="location-filter-group-partnership">
+                <label>🌍 Geography</label>
+                <select
+                  value={geography}
+                  onChange={(e) => setGeography(e.target.value)}
+                  className="location-select-partnership"
+                >
+                  {geographyOptions.map((g) => (
+                    <option key={g} value={g}>
+                      {g}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="checkbox-group-partnership">
+                <label>Status</label>
+                <div style={{ display: 'flex', gap: '15px' }}>
+                  <label className="checkbox-label-partnership">
+                    <input
+                      type="checkbox"
+                      checked={filterActive}
+                      onChange={(e) => setFilterActive(e.target.checked)}
+                      className="checkbox-input-partnership"
+                    />
+                    <span>Active</span>
+                  </label>
+                  <label className="checkbox-label-partnership">
+                    <input
+                      type="checkbox"
+                      checked={filterClosed}
+                      onChange={(e) => setFilterClosed(e.target.checked)}
+                      className="checkbox-input-partnership"
+                    />
+                    <span>Inactive</span>
+                  </label>
+                </div>
+              </div>
+
+              <div className="checkbox-group-partnership">
+                <label>Contracts</label>
+                <div style={{ display: 'flex', gap: '15px' }}>
+                  <label className="checkbox-label-partnership">
+                    <input
+                      type="checkbox"
+                      checked={contracts.valid}
+                      onChange={(e) => setContracts({ ...contracts, valid: e.target.checked })}
+                      className="checkbox-input-partnership"
+                    />
+                    <span>Valid</span>
+                  </label>
+                  <label className="checkbox-label-partnership">
+                    <input
+                      type="checkbox"
+                      checked={contracts.closed}
+                      onChange={(e) => setContracts({ ...contracts, closed: e.target.checked })}
+                      className="checkbox-input-partnership"
+                    />
+                    <span>Closed</span>
+                  </label>
+                </div>
+              </div>
+
+             
+            </div>
           </div>
         </div>
-        <div style={{ height: 600, width: "100%" }}>
-          <DataGrid
-            rows={filtered.map((p, idx) => ({ ...p, id: p.id || idx }))}
-            columns={[
-              { field: "entityName", headerName: "Entity", width: 150 },
-              { field: "parties", headerName: "Parties", width: 100 },
-              { field: "typeOfPartner", headerName: "Type", width: 150 },
-              { field: "geography", headerName: "Geography", width: 150 },
-              { field: "validTill", headerName: "Valid Till", width: 120 },
-              { field: "status", headerName: "Status", width: 120 },
-              { field: "objective", headerName: "Objective", width: 200 },
-              {
-                field: "contactPersonName",
-                headerName: "Contact Person",
-                width: 150,
-              },
-              { field: "createdOn", headerName: "Created", width: 120 },
-              {
-                field: "governingLaw",
-                headerName: "Governing Law",
-                width: 150,
-              },
-              { field: "signatory", headerName: "Signatory", width: 150 },
-              {
-                field: "typeOfInstrument",
-                headerName: "Instrument Type",
-                width: 150,
-              },
-            ]}
-            components={{ Toolbar: GridToolbar }}
-            initialState={{
-              pagination: { paginationModel: { page: 0, pageSize: 10 } },
-            }}
-            pageSizeOptions={[10, 20, 50]}
-            sx={{
-              "& .MuiDataGrid-columnHeader":
+
+        {/* Charts Section - First Row */}
+        <div className="grid-3-partnership">
+          <div className="dashboard-card-partnership">
+            <div className="card-header-partnership">
+              <h2>📋 Contracts by Status</h2>
+              <span className="card-subtitle-partnership">Active vs Inactive</span>
+            </div>
+            <div style={{ height: '280px', padding: '10px 0' }}>
+              <Pie data={statusData} options={commonOptions as any} />
+            </div>
+          </div>
+
+          <div className="dashboard-card-partnership">
+            <div className="card-header-partnership">
+              <h2>📅 Contracts Status</h2>
+              <span className="card-subtitle-partnership">Valid vs Expired</span>
+            </div>
+            <div style={{ height: '280px', padding: '10px 0' }}>
+              <Pie data={contractsData} options={commonOptions as any} />
+            </div>
+          </div>
+
+          <div className="dashboard-card-partnership">
+            <div className="card-header-partnership">
+              <h2>🌍 Partners by Geography</h2>
+              <span className="card-subtitle-partnership">Regional Distribution</span>
+            </div>
+            <div style={{ height: '280px', padding: '10px 0' }}>
+              <Bar data={geoData} options={barOptions as any} />
+            </div>
+          </div>
+        </div>
+
+        {/* Charts Section - Second Row */}
+        <div className="grid-2-partnership">
+          <div className="dashboard-card-partnership">
+            <div className="card-header-partnership">
+              <h2>📈 Upcoming Valid Till</h2>
+              <span className="card-subtitle-partnership">Contract Timeline</span>
+            </div>
+            <div style={{ height: '280px', padding: '10px 0' }}>
+              <Line data={timeData} options={lineOptions as any} />
+            </div>
+          </div>
+
+          <div className="dashboard-card-partnership">
+            <div className="card-header-partnership">
+              <h2>🏢 Partners by Type</h2>
+              <span className="card-subtitle-partnership">Type Distribution</span>
+            </div>
+            <PartnersByType />
+          </div>
+        </div>
+
+        {/* Table Section */}
+        <div className="dashboard-card-partnership" style={{ marginBottom: '0' }}>
+          <div className="card-header-partnership">
+            <h2>📊 Partnership Details</h2>
+            <span className="card-subtitle-partnership">Complete Partnership Records</span>
+          </div>
+          <div style={{ height: 600, width: "100%" }}>
+            <DataGrid
+              rows={filtered.map((p, idx) => ({ ...p, id: p.id || idx }))}
+              columns={[
+                { field: "entityName", headerName: "Entity", width: 150 },
+                { field: "parties", headerName: "Parties", width: 100 },
+                { field: "typeOfPartner", headerName: "Type", width: 150 },
+                { field: "geography", headerName: "Geography", width: 150 },
+                { field: "validTill", headerName: "Valid Till", width: 120 },
+                { field: "status", headerName: "Status", width: 120 },
+                { field: "objective", headerName: "Objective", width: 200 },
                 {
-                  background: "#4b91f1 !important",
+                  field: "contactPersonName",
+                  headerName: "Contact Person",
+                  width: 150,
                 },
-
-              "& .MuiDataGrid-columnHeaders": {
-                backgroundColor: "#4b91f1",
-                color: "#fff",
-                fontSize: "14px",
-                fontWeight: "bold",
-              },
-
-              "& .MuiDataGrid-virtualScroller": {
-                overflowY: "auto",
-              },
-
-              /* 🔥 Custom Scrollbar */
-              
-              "& .MuiDataGrid-virtualScroller::-webkit-scrollbar": {
-                width: "8px ",
-                height:"8px"
-              },
-              "& .MuiDataGrid-virtualScroller::-webkit-scrollbar-track": {
-                background: "#e4e7ec",
-                borderRadius: "8px",
-              },
-              "& .MuiDataGrid-virtualScroller::-webkit-scrollbar-thumb": {
-                background: "#4b91f1",
-                borderRadius: "8px",
-              },
-              "& .MuiDataGrid-virtualScroller::-webkit-scrollbar-thumb:hover": {
-                background: "#3872c9",
-              },
-            }}
-          />
+                { field: "createdOn", headerName: "Created", width: 120 },
+                {
+                  field: "governingLaw",
+                  headerName: "Governing Law",
+                  width: 150,
+                },
+                { field: "signatory", headerName: "Signatory", width: 150 },
+                {
+                  field: "typeOfInstrument",
+                  headerName: "Instrument Type",
+                  width: 150,
+                },
+              ]}
+              components={{ Toolbar: GridToolbar }}
+              initialState={{
+                pagination: { paginationModel: { page: 0, pageSize: 10 } },
+              }}
+              pageSizeOptions={[10, 20, 50]}
+              sx={{
+                backgroundColor: '#fff',
+                borderRadius: '12px',
+                border: 'none',
+                "& .MuiDataGrid-columnHeaders": {
+                  backgroundColor: "#5865f2",
+                  color: "#fff",
+                  fontSize: "14px",
+                  fontWeight: "700",
+                  borderRadius: '12px 12px 0 0',
+                },
+                "& .MuiDataGrid-columnHeader": {
+                  outline: 'none !important',
+                },
+                "& .MuiDataGrid-cell": {
+                  borderBottom: '1px solid #f1f5f9',
+                  color: '#475569',
+                  fontSize: '13px',
+                },
+                "& .MuiDataGrid-row:hover": {
+                  backgroundColor: '#f8fafc',
+                },
+                "& .MuiDataGrid-virtualScroller": {
+                  overflowY: "auto",
+                },
+                "& .MuiDataGrid-virtualScroller::-webkit-scrollbar": {
+                  width: "10px",
+                  height: "10px"
+                },
+                "& .MuiDataGrid-virtualScroller::-webkit-scrollbar-track": {
+                  background: "#f1f5f9",
+                  borderRadius: "10px",
+                },
+                "& .MuiDataGrid-virtualScroller::-webkit-scrollbar-thumb": {
+                  background: "#5865f2",
+                  borderRadius: "10px",
+                },
+                "& .MuiDataGrid-virtualScroller::-webkit-scrollbar-thumb:hover": {
+                  background: "#4b52d9",
+                },
+                "& .MuiDataGrid-footerContainer": {
+                  borderTop: '2px solid #e2e8f0',
+                  backgroundColor: '#f8fafc',
+                },
+              }}
+            />
+          </div>
         </div>
       </div>
+
+      {/* Styles */}
+      <style>
+        {`
+          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+          * {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+          }
+
+          .filter-card-partnership {
+            background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.9) 100%);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 28px 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.12);
+            margin-bottom: 35px;
+            border: 1px solid rgba(255,255,255,0.3);
+            transition: all 0.3s ease;
+          }
+
+          .filter-card-partnership:hover {
+            box-shadow: 0 15px 50px rgba(0,0,0,0.18);
+            transform: translateY(-2px);
+          }
+
+          .filter-icon-partnership {
+            font-size: 32px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            flex-shrink: 0;
+          }
+
+          .date-input-group-partnership {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+          }
+
+          .date-input-group-partnership label,
+          .location-filter-group-partnership label,
+          .checkbox-group-partnership label {
+            font-weight: 600;
+            font-size: 13px;
+            color: #475569;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+          }
+
+          .date-input-partnership {
+            padding: 12px 16px;
+            border-radius: 12px;
+            border: 2px solid #e2e8f0;
+            font-size: 14px;
+            font-weight: 500;
+            color: #1e293b;
+            background: white;
+            transition: all 0.2s ease;
+            min-width: 160px;
+          }
+
+          .date-input-partnership:hover {
+            border-color: #cbd5e1;
+          }
+
+          .date-input-partnership:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+          }
+
+          .location-filter-group-partnership {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+          }
+
+          .location-select-partnership {
+            padding: 12px 16px;
+            border-radius: 12px;
+            border: 2px solid #e2e8f0;
+            font-size: 14px;
+            font-weight: 500;
+            color: #1e293b;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-width: 180px;
+          }
+
+          .location-select-partnership:hover {
+            border-color: #cbd5e1;
+          }
+
+          .location-select-partnership:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+          }
+
+          .checkbox-group-partnership {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+          }
+
+          .checkbox-label-partnership {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #1e293b;
+            font-weight: 500;
+            transition: all 0.2s ease;
+          }
+
+          .checkbox-label-partnership:hover {
+            color: #5865f2;
+          }
+
+          .checkbox-input-partnership {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: #5865f2;
+          }
+
+          .clear-button-partnership {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #5865f2 0%, #764ba2 100%);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(88, 101, 242, 0.3);
+            transition: all 0.3s ease;
+            margin-left: auto;
+            white-space: nowrap;
+          }
+
+          .clear-button-partnership:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(88, 101, 242, 0.4);
+          }
+
+          .clear-button-partnership:active {
+            transform: translateY(0);
+          }
+
+          .grid-3-partnership {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+          }
+
+          .grid-2-partnership {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+          }
+
+          .dashboard-card-partnership {
+            background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.9) 100%);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.12);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255,255,255,0.3);
+            position: relative;
+            overflow: hidden;
+          }
+
+          .dashboard-card-partnership::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.4s ease;
+          }
+
+          .dashboard-card-partnership:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+          }
+
+          .dashboard-card-partnership:hover::before {
+            transform: scaleX(1);
+          }
+
+          .card-header-partnership {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f1f5f9;
+          }
+
+          .card-header-partnership h2 {
+            margin: 0 0 6px 0;
+            font-size: 20px;
+            font-weight: 700;
+            color: #1e293b;
+            letter-spacing: -0.3px;
+          }
+
+          .card-subtitle-partnership {
+            font-size: 13px;
+            color: #64748b;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+          }
+
+          .chart-scrollbar::-webkit-scrollbar {
+            width: 8px;
+          }
+
+          .chart-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 10px;
+          }
+
+          .chart-scrollbar::-webkit-scrollbar-thumb {
+            background: #5865f2;
+            border-radius: 10px;
+          }
+
+          .chart-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #4b52d9;
+          }
+
+          @media (max-width: 1400px) {
+            .grid-2-partnership {
+              grid-template-columns: 1fr;
+            }
+          }
+
+          @media (max-width: 1200px) {
+            .grid-3-partnership {
+              grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            }
+          }
+
+          @media (max-width: 768px) {
+            .filter-card-partnership {
+              padding: 20px;
+            }
+
+            .dashboard-card-partnership {
+              padding: 20px;
+            }
+
+            .card-header-partnership h2 {
+              font-size: 18px;
+            }
+
+            .grid-3-partnership,
+            .grid-2-partnership {
+              grid-template-columns: 1fr;
+            }
+          }
+        `}
+      </style>
     </div>
   );
 }
